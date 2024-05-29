@@ -92,8 +92,8 @@
    C_nDimCutCubeParaTop = 85 ;
    C_bSheetEnableCutMoveable = FALSE ;
    C_nPriFor = 3000 ;
-   C_nPriBla = 5000 ;
-   C_nPriFre = 1000 ;
+   C_nPriBla = 1000 ;
+   C_nPriFre = 5000 ;
    C_nDeltaSquad = 3000 ;
    C_nPriBlaDir = 0 ;
    C_sSuffInvert = "S" ;
