@@ -1,0 +1,138 @@
+// **********************************************************************
+// Dati di personalizzazione Holzher ProMaster               28/10/2013 *
+// **********************************************************************
+// Client: HOLZHER                                                      *
+// **********************************************************************
+// Modifiche:                                                           *
+// 28/10/2013 LF Prima versione                                         *
+// **********************************************************************
+
+// variabili personalizzabili da file ppp
+
+   BOOL     p_bWriteCampusVersWarning ;
+   BOOL     p_bEnablePieceOffs ;
+   BOOL     p_bEnableParkingInstr ;
+   BOOL     p_bEnableRefActivation ;
+   BOOL     p_bDrillUseAutoDiam ;
+   BOOL     p_bWriteExtFileForMacroIso ;
+   BOOL     p_bExplodeArcOnNotTopPlane ;
+   BOOL     p_bUsePathVariableForMacro ;
+   BOOL     p_bEnableSim ;
+   BOOL     p_bIs7225 ;
+   BOOL     p_bManageDrillWithGeomCmd ;
+   BOOL     p_bForceFeedFromKit ;
+   BOOL     p_bForceFeedFromKitMD ;
+   BOOL     p_bManageLeadFactor ;
+   BOOL     p_bUseClientParking ;
+   BOOL     p_bUseSetContour ;
+   BOOL     p_bOutBearb_kleben ;
+   BOOL     p_bUseOldLeadManager ;
+   BOOL     p_bUseSetContourDinIso ;
+   BOOL     p_bAvoidEqualToolCall ;
+   BOOL     p_bCampusvers7 ;
+   BOOL     p_bEvolution ;
+
+   NUM      p_nTypeSelTool ;
+   NUM      p_nUseMM ;
+   NUM      p_nLeadFactor ;
+   NUM      p_nHopLang  ;
+   NUM      p_nDispType ;
+   NUM      p_nTypeOfsZJLX = N_PIECE_OFS_Z_UPPER ;
+   NUM      p_nClamexDirX ;
+   NUM      p_nClamexDirY ;
+
+   STRING   p_sHeadsetHeights[3] = "" ;
+   STRING   p_sActiveMachine ;
+   STRING   p_sLanguage ;
+   STRING   p_sParkingInstr ;
+   STRING   p_szParkingInstr_Old ;
+   STRING   p_szParkingInstr_New ;
+   STRING   p_sIdForMultiDrill ;
+   STRING   p_sValForDynamic[N_MAX_DYN_TYPE] ;
+   STRING   p_sPathForGenMacroIso = "" ;
+   STRING   p_szMacroIsoGenDir = "" ;
+   STRING   p_sPathForJLXFile = "" ;
+   STRING   p_sDrillLabelForType[4] = "" ;
+   STRING   p_sSetContourV2On ;
+   STRING   p_sSetContourV2Off ;
+   STRING   p_sTableConfig ;
+   STRING   p_sReferencesInfo[N_MAX_REFERENCES] ;
+   STRING   p_sToolLaser ;
+   STRING   p_szDustBlowerActivation = "" ;
+
+{
+   p_bUseOldLeadManager       = FALSE ;
+   p_bAvoidEqualToolCall      = FALSE ;
+   p_bWriteCampusVersWarning  = TRUE ;
+   p_bManageDrillWithGeomCmd  = TRUE ;
+   p_bUsePathVariableForMacro = TRUE ;
+   p_nDispType                = DISP_JLX_NO ;   // DISP_JLX_NO: scrittura solo file hop     DISP_JLX_AUTO: scrittura JLX per tavole automatiche     DISP_JLX_MANUAL: scrittura JLX per tavole manuali
+   p_bIs7225                  = TRUE ;          // VARIABLEE TO CHANGE FOR THE MACHINE SWITCH
+   p_bEvolution               = FALSE ;
+   p_bForceFeedFromKit        = TRUE ;          // FALSE : Standard mach feed set as automatic variables | TRUE : Standard mach feed set with the same feed value saved in the kit
+   p_bForceFeedFromKitMD      = FALSE ;         // FALSE : Multiple drill feed set as automatic variables | TRUE : Multiple drill feed set with the same feed value saved in the kit
+   p_bWriteExtFileForMacroIso = TRUE ;          // TRUE: write external file for 5 axis code FALSE: call DINISO directly inside the HOPS file
+   p_bExplodeArcOnNotTopPlane = FALSE ;
+   p_bDrillUseAutoDiam        = FALSE ;
+   p_bEnablePieceOffs         = FALSE ;
+   p_bEnableRefActivation     = FALSE ;
+   p_bEnableParkingInstr      = TRUE ;
+   p_bEnableSim               = TRUE ;
+   p_bManageLeadFactor        = FALSE ;         // TRUE: use lead T-value, P-value. FALSE: use _ANF factor
+   p_bUseClientParking        = FALSE ;
+   p_bUseSetContour           = FALSE ;
+   p_bUseSetContourDinIso     = FALSE ;
+   p_bOutBearb_kleben         = FALSE ;         // Output CALL macro OutBearb_kleben in machining header
+   p_nTypeSelTool             = N_TOOLSEL_BY_CORR ;             // N_TOOLSEL_BY_NAME - N_TOOLSEL_BY_POS - N_TOOLSEL_BY_CORR
+   p_nUseMM                   = 0 ;             // 0: MM - 1: inch
+   p_nLeadFactor              = 1 ;
+   p_sActiveMachine           = "7135C_116" ;   // attrezzaggio utensili usati (MACCHINA)
+  // Valori per PARCHEGGIO:  0=Nessun parcheggio 1=Sinistra Dietro 2=Destra Dietro 3=Metà Dietro 4=Sinistra Fronte 5=Destra Fronte
+  //                         6=Metà Fronte 7=Sinistra Metà 8=Destra Metà 9=Centro Macchina 10=Manuale 11=Automatico
+   p_szParkingInstr_Old       = "VAL PARK:=11,X:=0,Y:=0" ;
+   p_szParkingInstr_New       = "VAL MODE:=11,POSX:=0,POSY:=0" ;
+   p_sParkingInstr            = p_szParkingInstr_New ;
+   p_sLanguage                = "ENG" ;
+   p_sIdForMultiDrill         = "501" ;
+   p_sPathForGenMacroIso      = "D:\Campus\Data\Hops\DDX test" ;
+   p_szMacroIsoGenDir         = "D:\Campus\Data\Hops\DDX test" ;
+   p_sPathForJLXFile          = $FileDir ;
+   p_sSetContourV2On          = "CALL HH_SetContourV2_on ( VAL CON_PROFIL:=2,CON_DYNLEVEL:=1,CON_ACCEL:=110,CON_JERK:=90,CON_CHECK:=0,CON_METHODE:=11,CON_QUALITY:=15,CON_ASYMETRIC:=0,CON_SETTING:=2)" ;
+   p_sSetContourV2Off         = "CALL HH_SetContourV2_off ()" ;
+   p_sToolLaser               = "1999" ;
+   p_nClamexDirX              = 0 ; // ! 1361 ;
+   p_nClamexDirY              = 0 ; // ! 1360 ;
+
+   p_nHopLang = 2 ;        //VARIABLE FOR MACRO HOP LANGUAGE: 1=ENGLISH, 2=GERMAN
+
+   // Instruction for Dynamic Type
+   p_sValForDynamic[1] = "24" ;
+   p_sValForDynamic[2] = "25" ;
+   p_sValForDynamic[3] = "26" ;
+   p_sValForDynamic[4] = "27" ;
+   p_sValForDynamic[5] = "28" ;
+   p_sValForDynamic[6] = "29" ;
+
+   p_sHeadsetHeights[1] = "0" ;
+   p_sHeadsetHeights[2] = "110" ;
+   p_sHeadsetHeights[3] = "270" ;
+
+   p_sDrillLabelForType[1] = "_10" ;
+   p_sDrillLabelForType[2] = "_20" ;
+   p_sDrillLabelForType[3] = "_30" ;
+   p_sDrillLabelForType[4] = "_40" ;
+
+  // Configurazione origini
+   p_sTableConfig = "AV_Frame" ;
+   p_nTypeOfsZJLX = N_PIECE_OFS_Z_UNDER ;  // N_PIECE_OFS_Z_UNDER - N_PIECE_OFS_Z_UPPER - N_PIECE_OFS_Z_ZERO
+   if ( $SyntType == _CNC AND p_nDispType != DISP_JLX_NO) {
+      DefineTableOrigin( &p_sReferencesInfo[1], "1", "AH_Frame", PIECE_SIDEX_RIGHT, PIECE_SIDEY_PUSH, 0, 1224.948, "") ;
+      DefineTableOrigin( &p_sReferencesInfo[2], "3", "AV_Frame", PIECE_SIDEX_RIGHT, PIECE_SIDEY_PULL, 0, 0, "") ;
+      DefineTableOrigin( &p_sReferencesInfo[3], "2", "DH_Frame", PIECE_SIDEX_LEFT, PIECE_SIDEY_PUSH, 4052.85, 1224.948, "") ;
+      DefineTableOrigin( &p_sReferencesInfo[4], "4", "DV_Frame", PIECE_SIDEX_LEFT, PIECE_SIDEY_PULL, 4052.85, 0, "") ;
+   }
+   p_sReferencesInfo[N_MAX_REFERENCES] = "" ;
+
+   p_szDustBlowerActivation = "CALL HH_set_Coldgun ()^nCALL HH_set_channel3 ()" ;
+   p_bCampusvers7 = TRUE ;
+}

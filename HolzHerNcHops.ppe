@@ -1,0 +1,202 @@
+// **********************************************************************
+// Data Environment for machine    Holzher                              *
+// **********************************************************************
+
+   STRING CONST SZ_POST_VERSION = "1.0.6" ;
+
+   NUM    const N_MAX_PIECES        = 4 ;
+   num    const N_MAX_BAR           = 20 ;
+   num    const N_MAX_SUB_ON_BAR    = 4 ;
+   num    const N_MAX_SUBPIECES     = N_MAX_BAR * N_MAX_SUB_ON_BAR ;
+   NUM    const N_BAD_INDEX         = -1 ;
+   NUM    const N_FEED_ENTRY        = 1 ;
+   NUM    const N_FEED_WORK         = 2 ;
+   NUM    const N_FEED_EXIT         = 3 ;
+   NUM    const PLANE_TOP           = 0 ;
+   NUM    const PLANE_FRONT         = 2 ;
+   NUM    const PLANE_BACK          = 1 ;
+   NUM    const PLANE_LEFT          = 3 ;
+   NUM    const PLANE_RIGHT         = 4 ;
+   NUM    const PLANE_BOTTOM        = 5 ;
+   NUM    const PLANE_GENERIC       = 6 ;
+   NUM    const N_MAX_DYN_TYPE      = 6 ;
+   NUM    const N_MAX_REFERENCES    = 50 ;
+   NUM    const N_MAX_FIX_BAR       = 4 ;
+   NUM    const N_LEADOUT_DIST      = 5 ;
+   STRING const STR_MOD2            = "Mod2_" ;
+   STRING const STR_MOD1            = "Mod1_" ;
+   STRING CONST STR_CAR             = "Car" ;
+   STRING const S_DEFAULT_DATE      = "01/01/2000" ;
+
+   // Stringhe macro HOP secondo la lingua
+   STRING const TOP_VIEW_ENG        = "; Work Plane Definition: Top View^nVIEW0()" ;
+   STRING const TOP_VIEW_TED        = "; Work Plane Definition: Top View^nEBENE0()" ;
+   STRING const FRONT_VIEW_ENG      = "; Work Plane Definition: Front View^nVIEW1()" ;
+   STRING const FRONT_VIEW_TED      = "; Work Plane Definition: Front View^nEBENE1()" ;
+   STRING const LEFT_VIEW_ENG       = "; Work Plane Definition: Left View^nVIEW2()" ;
+   STRING const LEFT_VIEW_TED       = "; Work Plane Definition: Left View^nEBENE2()" ;
+   STRING const BACK_VIEW_ENG       = "; Work Plane Definition: Back View^nVIEW3()" ;
+   STRING const BACK_VIEW_TED       = "; Work Plane Definition: Back View^nEBENE3()" ;
+   STRING const RIGHT_VIEW_ENG      = "; Work Plane Definition: Right View^nVIEW4()" ;
+   STRING const RIGHT_VIEW_TED      = "; Work Plane Definition: Right View^nEBENE4()" ;
+   STRING const GENERIC_VIEW_ENG    = "; Work Plane Definition: Generic View^nVIEW5(<PARAM>)" ;
+   STRING const GENERIC_VIEW_TED    = "; Work Plane Definition: Generic View^nEBENEF(<PARAM>)" ;
+
+   STRING const PIECE_INFO_ENG      = "FINISHED_PART" ;
+   STRING const PIECE_INFO_TED      = "FERTIGTEIL" ;
+
+   STRING const TOOL_ROUTER_ENG     = "TOOLM(" ;
+   STRING const TOOL_ROUTER_TED     = "WZF(" ;
+   STRING const TOOL_DRILL_ENG      = "TOOLD(" ;
+   STRING const TOOL_DRILL_TED      = "WZB(" ;
+   STRING const TOOL_SAW_ENG        = "TOOLS(" ;
+   STRING const TOOL_SAW_TED        = "WZS(" ;
+
+   STRING const HOR_DRIL_ENG        = "HORD" ;
+   STRING const HOR_DRIL_TED        = "HORZB" ;
+   STRING const VER_DRIL_ENG        = "DRILLING" ;
+   STRING const VER_DRIL_TED        = "BOHRUNG" ;
+   STRING const SAW_ENG             = "SAWING" ;
+   STRING const SAW_TED             = "SAEGEN" ;
+
+   string const S_IS_AGGRE          = "ISAG=" ;           // stringa nelle HeadInfo per sapere se la testa dichiarata é un aggregato
+   string const S_SMOPATH           = "SMO=" ;            // Stringa nelle HeadInfo per sapere quale é la variabile nel PPF che rapp
+   string const S_TABLE_PATH        = "Table\Piece" ;
+   string const S_DISPTABLE_PATH    = "Table\Piece\%%DISPSIMU\V&R\Sta3" ;
+   STRING const g_sPPPFile          = "HolzherNcHops.ppp" ;
+   STRING const g_sLngFile          = "HolzherNcHops.lng" ;
+   STRING const g_sPPLFile          = "HolzherNcHops.ppl" ;
+   STRING const g_sPPCFile          = "Common.ppc" ;
+   string const g_sSMOFile_7225     = "Epicon_7335.smo" ;            // file geometria di simulazione
+   string const g_sSMOFile_7125     = "Epicon_7335.smo" ;            // file geometria di simulazione
+   string const sAggre3e1           = "CarroX\CarroY\CarroZ\5Axis\CarrC\AuxB\CarrB\Rinvii\Aggre3e1" ;
+
+   //--------- Tipo di lavorazione ------------------
+   NUM    const MACH_TYPE_LASER     = 124 ;
+
+   //---------- Tipo di selezione utensile ----------
+   NUM    const N_TOOLSEL_BY_NAME   = 1 ;
+   NUM    const N_TOOLSEL_BY_POS    = 2 ;
+   NUM    const N_TOOLSEL_BY_CORR   = 3 ;
+
+   //---------- Indici file in uscita ---------------
+   NUM    const N_FILE_COMMON       = 0 ;       // -> Scrittura in tutti i file dei pezzi
+   NUM    const N_FILE_DIN_ISO      = 17 ;
+   NUM    const N_FILE_JLX          = 18 ;
+   NUM    const N_FILE_FIELD_L      = 19 ;
+   NUM    const N_FILE_FIELD_R      = 20 ;
+
+   //---------- Tipi di foro ------------------------
+   NUM    const DRILL_TYPE_NORMAL   = 10 ;
+   NUM    const DRILL_TYPE_CNTSINK  = 20 ;
+   NUM    const DRILL_TYPE_OPEN     = 30 ;
+   NUM    const DRILL_TYPE_RECESS   = 40 ;
+
+   //---------- Informazioni campi di lavoro --------
+   NUM    CONST FIELD_UNDEFINED     = 0 ;
+   NUM    CONST FIELD_LEFT          = 1 ;
+   NUM    CONST FIELD_RIGHT         = 2 ;
+   NUM    CONST FIELD_ALL           = 3 ;
+   NUM    CONST JLX_ID_FIELD_LEFT   = 0 ;
+   NUM    CONST JLX_ID_FIELD_RIGHT  = 1 ;
+
+   //------------------------------------------------
+   NUM CONST DISP_JLX_NO            = 0 ;
+   NUM CONST DISP_JLX_AUTO          = 1 ;
+   NUM CONST DISP_JLX_MANUAL        = 2 ;
+
+  // Fasi riposizionamento
+   num    const N_SET_ACTIVE_CLAMPS       = 1 ;
+   num    const N_SET_NOT_ACTIVE_CLAMPS   = 2 ;
+   num    const N_SET_INTER_ACTIVE_CLAMPS = 3 ;
+  // Modalità di cambio stato in risposizionamento
+   num    const N_NOT_MOVE_CLAMPS  = 0 ;
+   num    const N_MOVE_CLAMPS      = 1 ;
+   num    const N_HALF_MOVE_CLAMPS = 2 ;
+  // Modalità gestione barre mosse durante il riposizionamento
+   num    const N_FREE_BARS = 1 ;                  // Sblocco morsetti barra
+   num    const N_MOVE_BARS = 2 ;                  // Movimento morsetti barra
+   num    const N_FIX_BARS  = 3 ;                  // Blocco morsetti barra
+  // Stato morse in riposizionamento
+   num    const N_ACTIVE_CLAMPS     = 1 ;
+   num    const N_NOT_ACTIVE_CLAMPS = 2 ;
+   num    const N_NOT_DEFINED = 0 ;
+  // Stati di update della barra
+   num    const N_OPEN_VACUUM      = 1 ;           // fase di apertura morse
+   num    const N_MOVE_VACUUM      = 2 ;           // fase di movimentazione morse
+   num    const N_CLOSE_VACUUM     = 3 ;           // fase di chiusura morse
+
+   // Tipo di carico agevolato
+   NUM    CONST N_EASYLOAD_CLAMPS = 0 ;
+   NUM    CONST N_EASYLOAD_REFS_PUSH = 1 ;
+   NUM    CONST N_EASYLOAD_REFS_PULL = 2 ;
+
+   // Informazioni foro
+   STRING CONST HOLE_INFO_DIAM = "DMT=" ;
+   STRING CONST HOLE_INFO_DEPTH = "DPT=" ;
+   STRING CONST HOLE_INFO_POSX = "POSX=" ;
+   STRING CONST HOLE_INFO_POSY = "POSY=" ;
+   STRING CONST HOLE_INFO_POSZ = "POSZ=" ;
+   STRING CONST HOLE_INFO_DIRX = "DIRX=" ;
+   STRING CONST HOLE_INFO_DIRY = "DIRY=" ;
+   STRING CONST HOLE_INFO_DIRZ = "DIRZ=" ;
+   STRING CONST HOLE_INFO_ENABLED = "ENB=" ;
+   STRING CONST HOLE_INFO_OPEN = "OPEN=" ;
+   //-------- Informazioni Piano ----------
+   STRING CONST BAR_INFO_LEN = "LEN=" ;
+   STRING CONST BAR_INFO_OFSL = "OFSL=" ;
+   STRING CONST BAR_INFO_OFSR = "OFSR=" ;
+   //-------- Informazioni Morsa ----------
+   STRING CONST PAD_INFO_NAME = "NAM=" ;
+   STRING CONST PAD_INFO_OFST = "OFST=" ;
+   STRING CONST PAD_INFO_OFSB = "OFSB=" ;
+   STRING CONST PAD_INFO_OFSL = "OFSL=" ;
+   STRING CONST PAD_INFO_OFSR = "OFSR=" ;
+   //-------- Informazioni Origini --------
+   STRING CONST ORIGIN_INFO_NAME = "NAME=" ;
+   STRING CONST ORIGIN_INFO_ID   = "ID=" ;
+   STRING CONST ORIGIN_INFO_PIECESIDEX = "PISX=" ;
+   STRING CONST ORIGIN_INFO_PIECESIDEY = "PISY=" ;
+   STRING CONST ORIGIN_INFO_POSX = "POSX=" ;
+   STRING CONST ORIGIN_INFO_POSY = "POSY=" ;
+   STRING CONST ORIGIN_INFO_TABLE = "TAB=" ;
+   NUM CONST PIECE_SIDEX_RIGHT = 0 ;
+   NUM CONST PIECE_SIDEX_LEFT = 1 ;
+   NUM CONST PIECE_SIDEY_PUSH = 0 ;
+   NUM CONST PIECE_SIDEY_PULL = 1 ;
+
+   NUM CONST N_MAXOVERMAT = 50 ;
+
+   NUM CONST N_PATH_TYPE_OPEN = 1 ;
+   NUM CONST N_PATH_TYPE_CLOSED = 2 ;
+
+   NUM CONST N_STEP_TYPE_ALL_LINEAR = 1 ;
+   NUM CONST N_STEP_TYPE_ONE_WAY = 2 ;
+
+   NUM CONST N_PIECE_OFS_Z_UNDER = 0 ;
+   NUM CONST N_PIECE_OFS_Z_UPPER = 1 ;
+   NUM CONST N_PIECE_OFS_Z_ZERO = 2 ;
+
+  // P-System
+   NUM P_SYSTEM_DIAM[7] ;
+  // V6
+   STRING CONST P_SYSTEM_X_H_V6 = "CALL P_System_X_EVO_V6 ( VAL WKZ_WINKELGETRIEBE:=1361,EITI:=<PARAM-DIAM>,APV_1:=0,APV_2:=0,APV_3:=1,APV_4:=0,APV_5:=0,APV_6:=0,PDV_X_1:=0,PDV_X_2:=0,PDV_X_3:=<PARAM-X>,PDV_X_4:=0,PDV_X_5:=0,PDV_X_6:=0,PDV_Y_1:=0,PDV_Y_2:=0,PDV_Y_3:=<PARAM-Y>,PDV_Y_4:=0,PDV_Y_5:=0,PDV_Y_6:=0,AUSW_CLAMEXBISCO:=<PARAM-ID>)" ;
+   STRING CONST P_SYSTEM_Y_H_V6 = "CALL P_System_Y_EVO_V6 ( VAL WKZ_WINKELGETRIEBE:=1360,EITI:=<PARAM-DIAM>,APV_1:=0,APV_2:=0,APV_3:=1,APV_4:=0,APV_5:=0,APV_6:=0,PDV_X_1:=0,PDV_X_2:=0,PDV_X_3:=<PARAM-X>,PDV_X_4:=0,PDV_X_5:=0,PDV_X_6:=0,PDV_Y_1:=0,PDV_Y_2:=0,PDV_Y_3:=<PARAM-Y>,PDV_Y_4:=0,PDV_Y_5:=0,PDV_Y_6:=0,AUSW_CLAMEXBISCO:=<PARAM-ID>)" ;
+   STRING CONST P_SYSTEM_X_V_V6 = "CALL P_System_X_Mitte_EVO_V6 ( VAL WKZ_WINKELGETRIEBE:=1361,EITI:=<PARAM-DIAM>,APV_1:=0,APV_2:=0,APV_3:=1,APV_4:=0,APV_5:=0,APV_6:=0,PDV_X_1:=0,PDV_X_2:=0,PDV_X_3:=<PARAM-X>,PDV_X_4:=0,PDV_X_5:=0,PDV_X_6:=0,PDV_Y_1:=0,PDV_Y_2:=0,PDV_Y_3:=<PARAM-Y>,PDV_Y_4:=0,PDV_Y_5:=0,PDV_Y_6:=0,AUSW_CLAMEXBISCO:=<PARAM-ID>)" ;
+   STRING CONST P_SYSTEM_Y_V_V6 = "CALL P_System_Y_Mitte_EVO_V6 ( VAL WKZ_WINKELGETRIEBE:=1360,EITI:=<PARAM-DIAM>,APV_1:=0,APV_2:=0,APV_3:=1,APV_4:=0,APV_5:=0,APV_6:=0,PDV_X_1:=0,PDV_X_2:=0,PDV_X_3:=<PARAM-X>,PDV_X_4:=0,PDV_X_5:=0,PDV_X_6:=0,PDV_Y_1:=0,PDV_Y_2:=0,PDV_Y_3:=<PARAM-Y>,PDV_Y_4:=0,PDV_Y_5:=0,PDV_Y_6:=0,AUSW_CLAMEXBISCO:=<PARAM-ID>)" ;
+
+  // V7
+   STRING CONST P_SYSTEM_X_H_V7 = "" ;
+   STRING CONST P_SYSTEM_Y_H_V7 = "" ;
+   STRING CONST P_SYSTEM_X_V_V7 = "" ;
+   STRING CONST P_SYSTEM_Y_V_V7 = "" ;
+{
+  //
+   P_SYSTEM_DIAM[1] = 10 ;
+   P_SYSTEM_DIAM[2] = 14 ;
+   P_SYSTEM_DIAM[3] = 15 ;
+   P_SYSTEM_DIAM[4] = 14 ;
+   P_SYSTEM_DIAM[5] = 10 ;
+   P_SYSTEM_DIAM[6] = 14 ;
+   P_SYSTEM_DIAM[7] = 15 ;
+}

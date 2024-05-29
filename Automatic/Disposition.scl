@@ -1,0 +1,33 @@
+//  Componente disposizione SCL
+//
+//  10.03.13  Autore : MP
+//
+NUM CONST N_DIM_TABLE_Y = 0.0 ;
+
+// ===================================================================
+procedure AutoDisp()
+{
+   num nTotPiece ;
+   num nCurr ;
+   num nDimY ;
+   vec3 v3PiecePos ;
+   string sPart ;
+
+   v3PiecePos = VEC3( 0, 0 , 0) ;
+
+   nTotPiece = GetPiecesCount() ;
+   nCurr = 1 ;
+   while( nCurr <= nTotPiece){
+      sPart = GetPieceName( nCurr) ;
+      nDimY = YExtension( sPart + "\PANNELLO") ;
+      if( nDimY == 0)
+         nDimY = YExtension( sPart) ;
+      if( N_DIM_TABLE_Y == 0)
+         v3PiecePos.y = N_DIM_TABLE_Y ;
+      else
+         v3PiecePos.y = N_DIM_TABLE_Y - nDimY ;
+      if ( NOT SetPiecePosition( nCurr, v3PiecePos))
+         OutputBox( "Disp error") ;
+      nCurr = nCurr + 1 ;
+   }
+}

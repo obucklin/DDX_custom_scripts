@@ -1,0 +1,14 @@
+//  Componente usato per la disposizione
+//
+//  10.03.13  Autore : MP
+//
+
+Reset "Default.dis"
+
+AddPhaseFromAutomaticCAM
+
+// Ottimizzazione manuale delle fasi
+SetOptimize 3,1
+AutoDispSCL "Automatic\Disposition.scl", "AutoDisp()"
+
+Verify 1, FALSE

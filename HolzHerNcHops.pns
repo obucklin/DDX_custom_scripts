@@ -1,0 +1,17 @@
+//
+// Dati di personalizzazione note pezzo COVERTEK Uniteam 19.01.2015
+//
+AN=INT,GETMSG(349)         // Identificativo
+RE=STRING,GETMSG(348)      // Nome
+BG=STRING,GETMSG(370)      // Gruppo
+BS=STRING,GETMSG(371)      // Sottogruppo
+NUM=INT,GETMSG(374)        // Numero pezzi
+TY=STRING,GETMSG(373)      // Materiale
+TG=STRING,GETMSG(377)      // Tipo pezzo
+ASN=STRING,ASSEMBLYNUMBER  // ASSEMBLYNUMBER
+ORD=STRING,ORDERNUMBER     // ORDERNUMBER
+QT=STRING,QualityTimber    // Qualita' pezzo
+BU=STRING,GETMSG(372)      // Annotazione
+PN=STRING,ProjectName      // Nome progetto
+PNU=STRING, Project Number // Numero progetto
+PT=STRING,Package          // Package

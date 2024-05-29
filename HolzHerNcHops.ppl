@@ -1,0 +1,2110 @@
+﻿// **********************************************************************
+// Descrizione logica funzionamento Holzher ProMaster        28/10/2013 *
+// **********************************************************************
+
+   bool   g_bUseMacroIso       = FALSE ;
+   bool   g_bForceUseMacroIso  = FALSE ;
+   bool   g_bEndMachBlade      = FALSE ;
+   bool   g_bStartMachBlade    = FALSE ;
+   bool   g_bIsLeadIn          = FALSE ;
+   bool   g_bIsLeadOut         = FALSE ;
+   bool   g_bIsLink            = FALSE ;
+   bool   g_bIsFirstMach       = TRUE ;
+   bool   g_bIsFirstLinear     = TRUE ;
+   bool   g_bIsLaserMilling     = FALSE ;
+   bool   g_bActiveBar[N_MAX_BAR] ;
+   bool   g_bToolChanged       = FALSE ;
+   bool   g_bLinkedMach        = FALSE ;
+   bool   g_bForcePieceOnTable = FALSE ;
+   bool   g_bDustBlower        = FALSE ;
+   bool   g_bBladeSPEP         = FALSE ;
+   BOOL   g_bPSystem           = FALSE ;
+   num    g_nPosLoadPcs[N_MAX_SUB_ON_BAR] ;
+   num    g_nFirstRowWithPiece = -INFINITE ;
+   num    g_nLastRowWithPiece  = INFINITE ;
+   num    g_nEasyLoadType      = N_BAD_INDEX ;
+   num    g_nNumPiece          = 0 ;                   // contatore del numero di pezzi nel progetto
+   num    g_nContPiece         = 0 ;
+   num    g_nNumPhase          = 0 ;
+   num    g_nRapid             = 0 ;
+   num    g_nSavedFeed         = 0 ;
+   num    g_nPieceLaser        = 0 ;
+   num    g_nCurrTable         = 1 ;
+   NUM    g_nLinear            = 1 ;
+   num    g_nPosPieceOnTable   = 0 ;
+   NUM    g_nClamexTool        = 0 ;
+   NUM    g_nPSystemType       = -1 ;
+   NUM    g_nStepType          = 0 ;
+   string g_sLaserInstr[N_MAX_PIECES] ;
+   string g_sRoughInstr[N_MAX_PIECES] ;
+   string g_sTypePlane         = TOP_VIEW_ENG ;
+
+   vec3   g_v3StartPointForMacroIso ;
+   vec3   g_v3ToolRot ;
+   vec3   g_v3ToolFeed ;
+   vec3   g_v3PointPrec ;
+   vec3   g_v3FirstPoint ;
+   vec3   g_v3PosTable ;
+   vec3   g_v3DimTable ;
+   num    g_nSubPieceHight = 0 ;
+   num    g_nNumPadOnBar[N_MAX_BAR] ;           // number of Pads on the bar
+   string g_sNamePad[N_MAX_SUBPIECES] ;         // array name Pads
+   VEC3   g_v3PosBar[N_MAX_BAR] ;               // position of the bar
+   VEC3   g_v3PosPad[N_MAX_SUBPIECES] ;         // array position Pads
+   string g_sInfoPad[N_MAX_SUBPIECES] ;
+   string g_sInfoSub[N_MAX_SUBPIECES] ;
+   string g_sNameBar[N_MAX_BAR] ;
+   string g_sInfoBar[N_MAX_BAR] ;
+   string g_sNameBar_Prev[N_MAX_BAR] ;
+   num    g_nNumPadOnBar_Prev[N_MAX_BAR] ;           // number of Pads on the bar
+   string g_sNamePad_Prev[N_MAX_SUBPIECES] ;         // array name Pads
+   VEC3   g_v3PosBar_Prev[N_MAX_BAR] ;               // position of the bar
+   VEC3   g_v3PosPad_Prev[N_MAX_SUBPIECES] ;         // array position Pads
+   num    g_nStatusPad[N_MAX_SUBPIECES] ;         // array position Pads
+   num    g_nStatusPad_Prev[N_MAX_SUBPIECES] ;         // array position Pads
+   num    g_nPieceOnPad[N_MAX_SUBPIECES] ;         // array with piece index
+   num    g_nRotSub[N_MAX_SUBPIECES] ;             // array con rotazione sottopezzo
+
+   NUM      g_nTotBar ;
+   NUM      g_nCurrBar ;
+   NUM      g_nCurrPad ;
+   NUM      g_nTotPad ;
+
+   STRING   g_sCorrR ;
+   NUM      g_nToolComp ;
+   NUM      g_nToolCompPrec = -1 ;
+   NUM      g_nCorr ;
+   BOOL     g_bToolCompHasChanged = FALSE ;
+
+   num    g_nContHole = 0 ;
+   string g_sHoleInfo[500] ;
+
+   num      g_nZUnder ;
+
+  //------- Variabili per comandi diretti -----------
+   num g_nCntCmdPause = 0 ;
+   num g_nCntCmdNoStop = 0 ;
+   BOOL  g_bWriteSquaringMacro = FALSE ;
+   NUM   g_nMachDepthForSquaring = 0 ;
+   BOOL     g_bKeepPieceEnable = FALSE ;
+   VEC3     g_apKeepPiecePos[2] ;
+   BOOL     g_bKeepPieceAsLine = FALSE ;
+   STRING   g_szFirstDirCmd = "" ;
+
+//--------------------------------------------------------------------------------
+   procedure SetValStr( string& szSou, string szKey, string szVal)
+   {
+      num    nIndex ;
+      string szOldVal ;
+
+
+     // Controllo sintattico sulla chiave
+      if ( STRSTR( szKey, "=") <= 0)
+         szKey = szKey + "=" ;
+
+     // Cerco nella sorgente se la chiave è gia inserita
+      nIndex = STRSTR( szSou, szKey) ;
+      if ( nIndex > 0) {
+         nIndex = nIndex + STRLEN( szKey) ;
+        // Recupero il valore settato per la chiave
+         szOldVal = STRMID( szSou, nIndex, STRLEN( szSou)) ;
+         nIndex = STRSTR( szOldVal, ",") ;
+         if ( nIndex > 0) {
+            szOldVal = STRMID( szOldVal, 1, nIndex - 1) ;
+         }
+        // Sostituisco il valore, concatenato alla chiave per evitare alias
+         szSou = STRGSUB( szSou, OUTSTR("{szKey}{szOldVal},"), OUTSTR("{szKey}{szVal},")) ;
+      }
+     // Se non esiste la aggiungo semplicemente e la valorizzo
+      else {
+         szSou = szSou + OUTSTR("{szKey}{szVal},") ;
+      }
+   }
+
+//--------------------------------------------------------------------------------
+   procedure SetValNum( string& szSou, string szKey, num nVal)
+   {
+     // Evito eventuali "-0"
+      if ( nVal == 0) nVal = ABS(nVal) ;
+
+      SetValStr( &szSou, szKey, NUMTOSTRING( nVal, 0, 3)) ;
+   }
+
+//----------------------------------------------------------------------------
+   procedure DefineOrigin( string &szSou, string szID, string szName, num nSideX, num nSideY, num nPosX, num nPosY)
+   {
+      SetValStr( &szSou, ORIGIN_INFO_ID, szID) ;
+      SetValStr( &szSou, ORIGIN_INFO_NAME, szName) ;
+      SetValNum( &szSou, ORIGIN_INFO_PIECESIDEX, nSideX) ;
+      SetValNum( &szSou, ORIGIN_INFO_PIECESIDEY, nSideY) ;
+      SetValNum( &szSou, ORIGIN_INFO_POSX, nPosX) ;
+      SetValNum( &szSou, ORIGIN_INFO_POSY, nPosY) ;
+      SetValStr( &szSou, ORIGIN_INFO_TABLE, "") ;
+      OUTLOG( FALSE, "DefineOrigin: Deprecated Fuction please use -> DefineTableOrigin in ppp") ;
+   }
+
+//----------------------------------------------------------------------------
+   procedure DefineTableOrigin( string &szSou, string szID, string szName, num nSideX, num nSideY, num nPosX, num nPosY, string szTableCfg)
+   {
+      SetValStr( &szSou, ORIGIN_INFO_ID, szID) ;
+      SetValStr( &szSou, ORIGIN_INFO_NAME, szName) ;
+      SetValNum( &szSou, ORIGIN_INFO_PIECESIDEX, nSideX) ;
+      SetValNum( &szSou, ORIGIN_INFO_PIECESIDEY, nSideY) ;
+      SetValNum( &szSou, ORIGIN_INFO_POSX, nPosX) ;
+      SetValNum( &szSou, ORIGIN_INFO_POSY, nPosY) ;
+      SetValStr( &szSou, ORIGIN_INFO_TABLE, szTableCfg) ;
+   }
+
+//----------------------------------------------------------------
+   procedure ManageHeadsetForMachSim()
+   {
+      if (  STRSTR( $HeadName, "51") > 0 ) {
+         if ( $MachPar4 == 1) {
+            OUTCNC( "PNU ACT_CUFFIA " + p_sHeadsetHeights[1] + ", T:0.5") ;
+         }
+         elsif ( $MachPar4 == 2) {
+            OUTCNC( "PNU ACT_CUFFIA " + p_sHeadsetHeights[2] + ", T:0.5") ;
+         }
+         elsif ( $MachPar4 == 3) {
+            OUTCNC( "PNU ACT_CUFFIA " + p_sHeadsetHeights[3] + ", T:0.5") ;
+         }
+      }
+   }
+
+// --------------------------------------------------------------------
+   procedure ManagePlane()
+   {
+
+      if( $SyntType == _CNC)
+         ManagePlaneOnGen() ;
+      else
+         ManagePlaneOnSim() ;
+   }
+
+// --------------------------------------------------------------------
+   procedure ManageEndMachining()
+   {
+
+      if( $SyntType == _CNC)
+         ManageEndMachiningOnGen() ;
+      else
+         ManageEndMachiningOnSim() ;
+      g_bIsFirstLinear = TRUE ;
+      g_bIsLaserMilling = FALSE ;
+   }
+
+// --------------------------------------------------------------------
+   procedure ManageStartMachining()
+   {
+      STRING szToolChange ;
+
+
+      if( $MachType < 121) {
+         GlobalResetOnStartMach() ;
+
+         if( $SyntType == _CNC) {
+           // save tool instruction for multiple drilling only
+            if( $MachType == MACHTYPE_MULTIPLE_DRILL  OR  $MachType == MACHTYPE_DRILL_RDRU) {
+               g_sToolSelInstr = GetToolSelectDrill() ;
+            }
+
+            if( g_bIsFirstMach) {
+               ManageOutFile() ;
+               g_bIsFirstMach = FALSE ;
+            }
+            g_nFileId = GetIndexFromPieceName( $MachName) ;
+
+            ManageStartMachForGen() ;
+
+           // writing the Keep Piece macro
+            if ( g_bKeepPieceEnable) {
+               WriteKeepPieceMacro();
+            }
+         }
+         else {
+            if ( NOT g_bAlreadyLoaded ){
+               OutLoadPrj() ;
+               g_bAlreadyLoaded = TRUE ;
+            }
+            szToolChange = GetInstructionForLoadTool() ;
+            OUTCNC( szToolChange) ;
+           // visualizzo il portautensile
+            if( STRLEN( g_sCurrHolder) > 0) {
+               OUTCNC( g_sCurrHolder) ;
+            }
+            g_sCurrHolder = "" ;
+
+           //gestione cuffia
+            if ( STRLEN( szToolChange) > 0) {
+               g_bToolChanged = TRUE ;
+               OUTCNC( GetMovementsForLoadTool(&g_bToolChanged)) ;
+            }
+           // hood management
+            ManageHeadsetForMachSim() ;
+         }
+
+         g_nRapid = 1 ;
+      }
+
+     // lavorazione di foratura
+      if ( $MachType == MACHTYPE_DRILL) {
+         if( $SyntType == _CNC) {
+            g_nHoodPos = $MachPar2 - 1 ;
+            if( g_bForceUseMacroIso) {
+               g_nDynamicType = 1 ;
+               g_bUseMacroIso = TRUE ;
+            }
+            g_bDustBlower = OPT( $MachPar4==0, FALSE, TRUE) ;
+         }
+      }
+     // lavorazione di foratura multipla
+      elsif ( $MachType == MACHTYPE_MULTIPLE_DRILL) {
+         g_nZunder = $MachPar6 ;
+      }
+     // lavorazione di contornatura
+      elsif ( $MachType == MACHTYPE_CONTOURING) {
+         if( $SyntType == _CNC) {
+            g_nHoodPos = $MachPar4 - 1 ;
+
+            if( g_bForceUseMacroIso) {
+               g_nDynamicType = $MachPar3 ;
+               g_bUseMacroIso = TRUE ;
+            }
+           // Clamex System
+            if( $ToolCorr == p_nClamexDirX) {
+               g_nClamexTool = p_nClamexDirX ;
+               g_bIsClamex = TRUE ;
+            }
+            elsif( $ToolCorr == p_nClamexDirY) {
+               g_nClamexTool = p_nClamexDirY ;
+               g_bIsClamex = TRUE ;
+            }
+            g_bDustBlower = OPT( $MachPar6 == 0, FALSE, TRUE) ;
+
+           // save step type ( only for contouring machining )
+            g_nStepType = GetMachStepType( $MachParF) ;
+         }
+      }
+     // lavorazione di svuotatura
+      elsif ( $MachType == MACHTYPE_POCKETING) {
+         if( $SyntType == _CNC) {
+            g_nHoodPos = $MachPar4 - 1 ;
+            if( g_bForceUseMacroIso) {
+               g_nDynamicType = $MachPar3 ;
+               g_bUseMacroIso = TRUE ;
+            }
+            g_bDustBlower = OPT( $MachPar5==0, FALSE, TRUE) ;
+           // for pocketings it is always linear
+            g_nStepType = N_STEP_TYPE_ALL_LINEAR ;
+         }
+      }
+     // lavorazione di incisione con fresa
+      elsif ( $MachType == MACHTYPE_ENGRAVING) {
+         if( $SyntType == _CNC) {
+            g_nHoodPos = $MachPar4 - 1 ;
+            if( g_bForceUseMacroIso) {
+               g_nDynamicType = $MachPar3 ;
+               g_bUseMacroIso = TRUE ;
+            }
+            g_bDustBlower = OPT( $MachPar6==0, FALSE, TRUE) ;
+         }
+      }
+     // lavorazione di lama
+      elsif ( $MachType == MACHTYPE_BLADECUT AND NOT g_bBladeSPEP) {
+         if( $SyntType == _CNC) {
+            g_nHoodPos = $MachPar3 - 1 ;
+            g_nBladeAngle = $MachPar7 ;
+
+            if( $MachPar5 == 1) {
+               g_nCorSideBlade = 2 ;
+            }
+            elsif( $MachPar5 == 2) {
+               g_nCorSideBlade = 1 ;
+            }
+            else {
+               g_nCorSideBlade = $MachPar5 ;
+            }
+            g_nProcMode = $MachPar4 - 1 ;
+
+            if( g_bForceUseMacroIso) {
+               g_nDynamicType = 1 ;
+               g_bUseMacroIso = TRUE ;
+            }
+            g_bDustBlower = OPT( $MachPar8==0, FALSE, TRUE) ;
+         }
+      }
+     // lavorazione di foratura multipla rotante
+      elsif ( $MachType == MACHTYPE_DRILL_RDRU) {
+         if( $SyntType == _CNC) {
+            g_nHoodPos = $MachPar4 - 1 ;
+            g_nDynamicType   = 1 ;
+            g_bUseMacroIso = FALSE ;
+            g_bDustBlower = OPT( $MachPar3==0, FALSE, TRUE) ;
+         }
+      }
+     // lavorazione di contornatura con angolo di fianco
+      elsif ( $MachType == MACHTYPE_CONTWITHANGLE) {
+         if( $SyntType == _CNC) {
+            g_nHoodPos = $MachPar4 - 1 ;
+            g_nDynamicType   = $MachPar3 ;
+            g_bUseMacroIso = TRUE ;
+            g_bDustBlower = OPT( $MachPar6==0, FALSE, TRUE) ;
+           // save step type ( only for contouring machining )
+            g_nStepType = GetMachStepType( $MachParF) ;
+         }
+      }
+     // lavorazione di mortasatura
+      elsif ( $MachType == 109) {
+      }
+     // lavorazione di sgrossatura superficie
+      elsif ( $MachType == 110) {
+         if( $SyntType == _CNC) {
+            g_nDynamicType = $MachPar3 ;
+            g_nHoodPos = $MachPar4 - 1 ;
+            if( g_bForceUseMacroIso) {
+               g_bUseMacroIso = TRUE ;
+            }
+            g_bDustBlower = OPT( $MachPar5==0, FALSE, TRUE) ;
+         }
+      }
+     // lavorazione di finitura superficie
+      elsif ( $MachType == MACHTYPE_SURF_FINISH) {
+         if( $SyntType == _CNC) {
+            g_nDynamicType = $MachPar3 ;
+            g_nHoodPos = $MachPar4 - 1 ;
+            if( g_bForceUseMacroIso) {
+               g_bUseMacroIso = TRUE ;
+            }
+            g_bDustBlower = OPT( $MachPar5==0, FALSE, TRUE) ;
+         }
+      }
+     // lavorazione di finitura superficie a 5 assi
+      elsif ( $MachType == MACHTYPE_5AX_FINISH) {
+         if( $SyntType == _CNC) {
+            g_nDynamicType = $MachPar3 ;
+            g_nHoodPos = $MachPar4 - 1 ;
+            g_bUseMacroIso = TRUE ;
+            g_bDustBlower = OPT( $MachPar5==0, FALSE, TRUE) ;
+         }
+      }
+     // lavorazione di posizionamento intestatori (riferimenti)
+      elsif ( $MachType == 121) {
+      }
+     // lavorazione di posizionamento ventose
+      elsif ( $MachType == 122) {
+      }
+     // lavorazione di posizionamento bancaletti
+      elsif ( $MachType == 123) {
+      }
+      // lavorazione proiezione laser
+      elsif ( $MachType == MACHTYPE_LASER) {
+         g_nRapid = 1 ;
+         if( p_nHopLang == 1) {
+            g_sToolSelInstr = OUTSTR( "{TOOL_DRILL_ENG} {p_sToolLaser},_VE,_V,_VA,_SD,_ANF,'1')") ;
+         }
+         else {
+            g_sToolSelInstr = OUTSTR( "{TOOL_DRILL_TED} {p_sToolLaser},_VE,_V,_VA,_SD,_ANF,'1')") ;
+         }
+      }
+   }
+
+// --------------------------------------------------------------------
+function GetMachPathType( NUM nFlagStep) : NUM
+{
+   if ( nFlagStep > 100) {
+      return N_PATH_TYPE_OPEN ;
+   }
+   else {
+      return N_PATH_TYPE_CLOSED ;
+   }
+}
+
+// --------------------------------------------------------------------
+   function GetMachStepType( NUM nFlagStep) : NUM
+   {
+      BOOL     bPathOpen ;
+
+      bPathOpen = OPT( GetMachPathType( nFlagStep) == N_PATH_TYPE_OPEN, TRUE, FALSE) ;
+
+     // Open path
+      if ( bPathOpen ) {
+         /*
+            101 = STEP
+            102 = ONE WAY
+            103 = SPIRAL WITH STEPS
+            104 = SPIRAL
+         */
+         if ( nFlagStep == 101  OR  nFlagStep == 103  OR nFlagStep == 104 ) {
+           // STEP - ALL LINEAR
+            return N_STEP_TYPE_ALL_LINEAR ;
+         }
+         elsif ( nFlagStep == 102 ) {
+           // ONE WAY - SPLIT BY RAPID
+            return N_STEP_TYPE_ONE_WAY ;
+         }
+      }
+     // Closed path
+      else {
+         /*
+            1 = SPIRAL WITH STEPS
+            2 = STEP WITH SPIRAL LINKS
+            3 = ONE WAY
+            4 = SPIRAL
+            5 = STEP WITH RAMP LINK
+         */
+         if ( nFlagStep == 1  OR  nFlagStep == 2  OR  nFlagStep == 4  OR  nFlagStep == 5 ) {
+           // STEP - ALL LINEAR
+            return N_STEP_TYPE_ALL_LINEAR ;
+         }
+         elsif( nFlagStep == 3 ) {
+           // ONE WAY - SPLIT BY RAPID
+            return N_STEP_TYPE_ONE_WAY ;
+         }
+      }
+
+      return -1 ;
+   }
+
+// --------------------------------------------------------------------
+   procedure WriteMachineStop( num nParkPos, num nPosX, num nPosY, STRING sComment)
+   {
+
+      string sMessage ;
+
+      // Emetto solo una volta in tutti i file
+      g_nCntCmdPause = g_nCntCmdPause + 1 ;
+      if ( g_nCntCmdPause == g_nContPiece) {
+         g_nCntCmdPause = 0 ;
+         OutCncLine( OUTSTR("; ---------------------------------"), N_FILE_COMMON) ;
+         OutCncLine( OUTSTR("; MACHINE STOP"), N_FILE_COMMON) ;
+         OutCncLine( OUTSTR("; ---------------------------------"), N_FILE_COMMON) ;
+
+         if ( STRLEN( sComment) > 0)
+            sMessage = sComment ;
+         else
+            sMessage = "Machine STOP" ;
+
+         OutCncLine( OUTSTR("CALL HH_Machine_Stop( VAL MSG:='{sMessage}',PARK:={nParkPos},X:={nPosX},Y:={nPosY})"), N_FILE_COMMON) ;
+      }
+   }
+
+// --------------------------------------------------------------------
+   procedure WriteMachineStopNoStop( num nParkPos, num nPosX, num nPosY, STRING sComment)
+   {
+      string sMessage ;
+
+      // Emetto solo una volat in tutti i file
+      g_nCntCmdNoStop = g_nCntCmdNoStop + 1 ;
+      if ( g_nCntCmdNoStop == g_nContPiece) {
+         g_nCntCmdNoStop = 0 ;
+         OutCncLine( OUTSTR("; ---------------------------------"), N_FILE_COMMON) ;
+         OutCncLine( OUTSTR("; STOP NO STOP"), N_FILE_COMMON) ;
+         OutCncLine( OUTSTR("; ---------------------------------"), N_FILE_COMMON) ;
+
+         if ( STRLEN( sComment) > 0)
+            sMessage = sComment ;
+         else
+            sMessage = "NO STOP" ;
+
+         OutCncLine( OUTSTR("CALL HH_Machine_Stop_NoStop( VAL MSG:='{sMessage}',PARK:={nParkPos},X:={nPosX},Y:={nPosY})"), N_FILE_COMMON) ;
+      }
+   }
+
+//----------------------------------------------------------------------------------------------------------------------
+   procedure ManageDustBlower()
+   {
+      if ( g_bDustBlower) {
+         OutCncLine( p_szDustBlowerActivation, N_FILE_COMMON) ;
+      }
+   }
+
+//----------------------------------------------------------------------------------------------------------------------
+   procedure ManageEasyLoading()
+   {
+     // $TcmdPar3 -> Tipo carico
+     // $TcmdPar4 -> Y1 da origine EW
+     // $TcmdPar5 -> Y2 da origine EW
+     // $TcmdPar6 -> Y3 da origine EW
+     // $TcmdPar7 -> Y4 da origine EW
+
+     // Abilito il tipo di carico richiesto solo se tavola a piani automatici
+      if ( p_nDispType == DISP_JLX_AUTO)
+         g_nEasyLoadType =  $TcmdPar3 ;
+
+      g_nPosLoadPcs[1] = $TcmdPar4 + g_v3TableOfsOrig.y ;   // Y1
+      g_nPosLoadPcs[2] = $TcmdPar5 + g_v3TableOfsOrig.y ;   // Y2
+      g_nPosLoadPcs[3] = $TcmdPar6 + g_v3TableOfsOrig.y ;   // Y3
+      g_nPosLoadPcs[4] = $TcmdPar7 + g_v3TableOfsOrig.y ;   // Y4
+   }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+   procedure ManageTableConfig()
+   {
+      p_sTableConfig = $TcmdStr1 ;
+   }
+
+//----------------------------------------------------------------------------------------------------------------------
+   procedure ManagePiecePosOnTable()
+   {
+      g_bForcePieceOnTable = TRUE ;
+      g_nPosPieceOnTable = $TcmdPar3 ;
+   }
+
+// --------------------------------------------------------------------
+   procedure ManageSpecialCommand()
+   {
+      if( $SyntType == _CNC) {
+         if( $TcmdType == 2100) {
+            if ( g_bHeaderIsToWrite )
+               g_szFirstDirCmd = OUTSTR( "{$TcmdStr1}" ) ;
+            else
+               OutCncLine( OUTSTR( "{$TcmdStr1}"), g_nFileId) ;
+         }
+         if( $TcmdType == 2101) {
+            WriteMachineStop( $TcmdPar3, $TcmdPar4, $TcmdPar5, $TcmdStr1) ;
+         }
+         if( $TcmdType == 2102) {
+            WriteMachineStopNoStop( $TcmdPar3, $TcmdPar4, $TcmdPar5, $TcmdStr1) ;
+         }
+         if( $TcmdType == 2103) {
+            if( STRLEN( $TcmdStr1) > 0) {
+               p_sPathForGenMacroIso = $TcmdStr1 ;
+            }
+         }
+         if( $TcmdType == 2104) {
+            g_bForceUseMacroIso = TRUE ;
+         }
+        // Carico pezzi agevolato
+         if ( $TcmdType == 2105) {
+            ManageEasyLoading() ;
+         }
+        // personalizzazione tavole
+         if ( $TcmdType == 2106) {
+            ManageTableConfig() ;
+         }
+        // personalizzazione quota pezzo (pezzo direttamente sulle barre)
+         if ( $TcmdType == 2107) {
+            ManagePiecePosOnTable() ;
+         }
+        // Squaring macro
+         if ( $TcmdType == 2108) {
+            g_bWriteSquaringMacro = TRUE ;
+            g_nMachDepthForSquaring = $TcmdPar3 ;
+         }
+        // Macro for blade cut with SP-EP
+         if ( $TcmdType == 2109) {
+            g_bBladeSPEP = TRUE ;
+         }
+        // Macro for Clamex P-System
+         if ( $TcmdType == 2110) {
+            g_bPSystem = TRUE ;
+            g_nPSystemType = $TcmdPar3 ;
+         }
+        // Macro "Keep Pos" from Holzher
+         if ( $TcmdType == 2111) {
+            g_bKeepPieceEnable = TRUE ;
+           // first point used for both line and point
+            g_apKeepPiecePos[1] = VEC3( $TcmdPar4, $TcmdPar5, $TcmdPar6) ;
+           // second point used only as last point of the line
+            g_apKeepPiecePos[2] = VEC3( $TcmdPar7, $TcmdPar8, $TcmdPar9) ;
+           // allow to choose which to use between point and line description
+            g_bKeepPieceAsLine = OPT( $TcmdPar3 == 0, FALSE, TRUE) ;
+         }
+         if ( $TcmdType == 2112)
+            g_bIsLaserMilling = TRUE ;
+      }
+   }
+
+// --------------------------------------------------------------------
+   procedure ManageLeadInLeadOutForBlade()
+   {
+
+     // INIZIO ATTACCO
+      if( $TcmdPar1 == 1) {
+         g_nRapid       = 1 ;
+         g_bIsLeadIn    = TRUE ;
+         g_bStartMachBlade = FALSE ;
+         g_bEndMachBlade   = FALSE ;
+      }
+     // FINE ATTACCO - INIZIO LAVORAZIONE
+      elsif( $TcmdPar1 == 2) {
+         g_nRapid          = g_nRapid + 1 ;
+         g_bIsLeadIn       = FALSE ;
+         g_bStartMachBlade = TRUE ;
+      }
+     // INIZIO USCITA - FINE LAVORAZIONE
+      elsif( $TcmdPar1 == 3) {
+         g_bIsLeadOut      = TRUE ;
+         g_bStartMachBlade = FALSE ;
+         g_bEndMachBlade   = TRUE ;
+      }
+   }
+
+   // --------------------------------------------------------------------
+   procedure ManageLinksForBlade()
+   {
+
+     // Comando diretto INIZIO LINK
+      if( $TcmdPar1 == 1) {
+        // Se non ho ancora scritto la selezione utensile, la scrivo
+         if( NOT g_bBladeAlreadySelected) {
+            g_sToolSelInstr = GetToolSelect() ;
+            OutCncLine( OUTSTR( g_sToolSelInstr), g_nFileId) ;
+            ManageDustBlower() ;
+            OutCncLine( OUTSTR( g_sTypePlane), g_nFileId) ;
+            g_bBladeAlreadySelected = TRUE ;
+         }
+        // Scrivo il taglio letto finora e resetto tutto per partire a fare un nuovo taglio
+         ManageSawingMach() ;
+         ManageStartMachForGen() ;
+         g_bBladeAlreadySelected = FALSE ;
+         g_nRapid = 1 ;
+         g_bIsLeadOut      = TRUE ;
+         g_bStartMachBlade = FALSE ;
+         g_bEndMachBlade   = TRUE ;
+         g_bIsLink         = TRUE ;
+      }
+     // Comando diretto FINE LINK
+      elsif( $TcmdPar1 == 2) {
+         g_bIsLeadOut      = FALSE ;
+         g_bIsLink         = FALSE ;
+         g_bEndMachBlade   = FALSE ;
+         g_bStartMachBlade = TRUE ;
+      }
+   }
+
+// --------------------------------------------------------------------
+   procedure ManageHoleInfo()
+   {
+      num nIndex ;
+      vec3 vtPlaneOrig ;
+      string szName ;
+
+      // Info pezzo
+      szName = GetCurrPieceName( $MachName) ;
+      nIndex = GetIndexFromPieceName( szName) ;
+      // Porto origine sul grezzo
+      vtPlaneOrig.x = $PlaneOx + (g_v3PosFin[nIndex].x - g_v3PosGre[nIndex].x) ;
+      vtPlaneOrig.y = $PlaneOy + (g_v3PosFin[nIndex].y - g_v3PosGre[nIndex].y) ;
+      vtPlaneOrig.z = $PlaneOz + (g_v3PosFin[nIndex].z - g_v3PosGre[nIndex].z) ;
+      // Imposto i valori
+      g_nContHole = g_nContHole + 1 ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_DIAM, $TcmdPar6) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_DEPTH, $TcmdParA) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_POSX, $TcmdPar3 + vtPlaneOrig.x) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_POSY, $TcmdPar4 + vtPlaneOrig.y) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_POSZ, $TcmdPar5 + vtPlaneOrig.z) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_DIRX, $TcmdPar7) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_DIRY, $TcmdPar8) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_DIRZ, $TcmdPar9) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_ENABLED, $TcmdParC) ;
+      SetValNum( &g_sHoleInfo[g_nContHole], HOLE_INFO_OPEN, $TCmdParD) ;
+   }
+
+//----------------------------------------------------------------
+   procedure GetPiecesExt( VEC3 & v3Min, VEC3 & v3Max)
+   {
+      NUM  nI ;
+      VEC3 v3Result ;
+      VEC3 pPiecePos ;
+      VEC3 v3PieceDim ;
+
+
+      v3Min = VEC3( -VAL_NOT_DEFINED, -VAL_NOT_DEFINED, -VAL_NOT_DEFINED) ;
+      v3Max = VEC3( VAL_NOT_DEFINED, VAL_NOT_DEFINED, VAL_NOT_DEFINED) ;
+
+      nI = 1 ;
+      while( nI <= g_nContPiece) {
+        // if it is an Evolution machine
+         if ( p_bEvolution) {
+           // always work with the finite dimensions
+            pPiecePos = g_v3PosFin[nI] ;
+            pPiecePos.y = 0 ;
+            v3PieceDim = g_v3DimFin[nI] ;
+         }
+         else {
+            pPiecePos = g_v3PosGre[nI] ;
+            v3PieceDim = g_v3DimGre[nI] ;
+         }
+         v3Min.x = min( v3Min.x,  pPiecePos.x) ;
+         v3Min.y = min( v3Min.y,  pPiecePos.y) ;
+        // Se non ci sono ventose sotto il pezzo, restituisco errore
+         if( pPiecePos.z < 0 AND NOT g_bForcePieceOnTable)
+            OutLog( TRUE, g_sErrNoVisUnderPiece) ;
+
+         v3Min.z = min( v3Min.z,  pPiecePos.z - v3PieceDim.z) ;
+         v3Max.x = max( v3Max.x,  pPiecePos.x + v3PieceDim.x) ;
+         v3Max.y = max( v3Max.y,  pPiecePos.y + v3PieceDim.y) ;
+         v3Max.z = max( v3Max.z,  v3PieceDim.z) ;
+
+         nI = nI + 1 ;
+      }
+   }
+
+   //----------------------------------------------------------------
+// Set the Bar information in variable
+   procedure SetBarInfo()
+   {
+      string szInfo ;
+
+
+      if( STRSTR( $TcmdStr2, STR_MOD2) > 0) {
+         szInfo = STRGSUB( $TcmdStr1, "(", "=") ;
+         szInfo = STRGSUB( szInfo, ")", ",") ;
+
+         g_nCurrBar = STRINGTONUM( STRGSUB( $TcmdStr2, STR_MOD2, "")) ;
+         g_nTotBar = MAX( g_nTotBar, g_nCurrBar) ;
+
+         if( g_nNumPhase > 1) {
+            g_sNameBar_Prev[g_nCurrBar] = g_sNameBar[g_nCurrBar] ;
+            g_v3PosBar_Prev[g_nCurrBar] = g_v3PosBar[g_nCurrBar] ;
+         }
+
+         g_sNameBar[g_nCurrBar] = $TcmdStr2 ;
+         g_v3PosBar[g_nCurrBar] = VEC3( $TcmdPar3 + g_v3TableOfsOrig.x, 0, 0) ;
+         g_sInfoBar[g_nCurrBar] = szInfo ;
+      }
+   }
+
+//----------------------------------------------------------------------------------------------------------------------
+   function GetPadIndex( num nBar, num nPad) : num
+   {
+      if ( nBar == 0 OR nBar > N_MAX_BAR)        return N_BAD_INDEX ;
+      if ( nPad == 0 OR nPad > N_MAX_SUB_ON_BAR) return N_BAD_INDEX ;
+      return (( nBar - 1) * N_MAX_SUB_ON_BAR) + nPad ;
+   }
+
+//----------------------------------------------------------------------------------------------------------------------
+   procedure SetPieceOnPad( num nBar, num nSub, num nNumPiece)
+   {
+      g_nPieceOnPad[GetPadIndex( nBar, nSub)] = nNumPiece ;
+
+      // VARIABILI PER CARICO FACILITATO DEI PEZZI
+      if ( nNumPiece > 0) {
+         if ( nSub > g_nFirstRowWithPiece)
+            g_nFirstRowWithPiece = nSub ;
+         if ( nSub < g_nLastRowWithPiece)
+            g_nLastRowWithPiece = nSub ;
+      }
+   }
+
+//----------------------------------------------------------------------------------------------------------------------
+   function GetPieceOnPad( num nBar, num nSub) : num
+   {
+      return g_nPieceOnPad[GetPadIndex( nBar, nSub)] ;
+   }
+
+//----------------------------------------------------------------------------------------------------------------------
+   function IsPieceOnPad( num nBar, num nSub) : bool
+   {
+      return GetPieceOnPad( nBar, nSub) >= 1 ;
+   }
+
+//----------------------------------------------------------------------------------------------------------------------
+   function IsPieceOnBar( num nBar) : bool
+   {
+      num nSub ;
+
+
+     // ciclo di ricerca presenza pezzo sulla barra corrente
+      nSub = 1 ;
+      while( nSub <= g_nTotPad) {
+         if ( IsPieceOnPad( nBar, nSub))
+            return TRUE ;
+        // prossimo sottopezzo
+         nSub = nSub + 1 ;
+      }
+
+      return FALSE ;
+   }
+
+//----------------------------------------------------------------------------
+   procedure SetPadInfo()
+   {
+      num nPad ;
+      num nCar ;
+      string szBuff ;
+      string szInfo ;
+
+      // Trasformo la stringa della classe con stringa per lettura valori
+      szInfo = STRGSUB( $TcmdStr1, "(", "=") ;
+      szInfo = STRGSUB( szInfo, ")", ",") ;
+      // Ricavo numero di carrello corrente
+      if ( STRSTR( $TcmdStr2, "_") > 0)
+         szBuff = STRMID( $TcmdStr2, STRSTR( $TcmdStr2, "_") + 1, STRLEN($TcmdStr2)) ;
+      else
+         szBuff = STRMID( $TcmdStr2, STRLEN($TcmdStr2) - 1, STRLEN($TcmdStr2)) ;
+      nCar = STRINGTONUM( szBuff) ;
+
+      // Salvo numero massimo di sottopezzi
+      nPad = GetPadIndex( g_nCurrBar, nCar) ;
+      g_nCurrPad = nPad ;
+      g_nTotPad = MAX( nCar, g_nTotPad) ;
+
+      // Se carrello vuoto (non mi arriverà la morsa)
+      if ( $TcmdPar5 >= 1) {
+         // Salvo i dati precedenti
+         if ( g_nNumPhase > 1) {
+           // set the name of the pad
+            g_sNamePad_Prev[nPad] = g_sNamePad[nPad] ;
+           // save the position of the pad
+            g_v3PosPad_Prev[nPad] = g_v3PosPad[nPad] ;
+           // count the pad for each bar
+            g_nNumPadOnBar_Prev[g_nCurrBar] = g_nNumPadOnBar[g_nCurrBar] ;
+           // get the status of the PAD (clamp - not clamp)
+            g_nStatusPad_Prev[nPad] = g_nStatusPad[nPad] ;
+         }
+
+        // count the pad for each bar
+         g_nNumPadOnBar[g_nCurrBar] = g_nNumPadOnBar[g_nCurrBar] + 1 ;
+        // stato del pad
+         g_nStatusPad[nPad] = N_NOT_ACTIVE_CLAMPS ;
+        // save the position of the pad
+         g_v3PosPad[nPad] = VEC3( g_v3PosBar[g_nCurrBar].x, $TcmdPar3 + g_v3TableOfsOrig.y, g_nCurrBar) ;
+      }
+
+     // set the name of the pad
+      if( $SyntType == _CNC) {
+         g_sNamePad[nPad] = $TcmdStr1 ;
+         g_sInfoPad[nPad] = szInfo ;
+      }
+      else
+         g_sNamePad[nPad] = $TcmdStr2 ;
+
+   }
+
+
+//----------------------------------------------------------------
+// Set the Clamp\Vacuum information in variable
+   procedure SetSubInfo()
+   {
+      num nPad ;
+      string szInfo ;
+
+      if( g_nTableType != N_TABLE_TYPE_EPS) {
+         OutLog( FALSE, "JLX NOT AVAILABLE WITH THIS KIND OF TABLE") ;
+         return ;
+      }
+
+      // Trasformo la stringa della classe con stringa per lettura valori
+      szInfo = STRGSUB( $TcmdStr1, "(", "=") ;
+      szInfo = STRGSUB( szInfo, ")", ",") ;
+
+      nPad = GetPadIndex( g_nCurrBar, $TcmdPar6) ;
+      g_nTotPad = max( g_nTotPad, $TcmdPar6) ;
+
+
+      if( g_nNumPhase > 1) {
+        // set the name of the pad
+         g_sNamePad_Prev[nPad] = g_sNamePad[nPad] ;
+        // save the position of the pad
+         g_v3PosPad_Prev[nPad] = g_v3PosPad[nPad] ;
+        // count the pad for each bar
+         g_nNumPadOnBar_Prev[g_nCurrBar] = g_nNumPadOnBar[g_nCurrBar] ;
+        // get the status of the PAD (clamp - not clamp)
+         g_nStatusPad_Prev[nPad] = g_nStatusPad[nPad] ;
+      }
+
+     // set the name of the pad
+      if( $SyntType == _CNC) {
+         g_sNamePad[nPad] = g_sNamePad[nPad] + "," + $TcmdStr1 ;
+         g_sInfoSub[nPad] = szInfo ;
+         g_nRotSub[nPad] = $TcmdPar4 ;
+      }
+      else
+         g_sNamePad[nPad] = $TcmdStr2 ;
+
+      // Se sto pinzando un pezzo
+      if ( $TcmdPar7 >= 1)
+         g_bActiveBar[g_nCurrBar] = TRUE ;
+
+      SetPieceOnPad( g_nCurrBar, $TcmdPar6, $TcmdPar7) ;
+
+     // save the position of the pad
+      g_v3PosPad[nPad] = VEC3( g_v3PosBar[g_nCurrBar].x, $TcmdPar3 + g_v3TableOfsOrig.y, g_nCurrBar) ;
+     // stato del pad
+      g_nStatusPad[nPad] = OPT( $TcmdPar7 >= 1, N_ACTIVE_CLAMPS, N_NOT_ACTIVE_CLAMPS) ;
+     // count the pad for each bar
+      g_nNumPadOnBar[g_nCurrBar] = g_nNumPadOnBar[g_nCurrBar] + 1 ;
+   }
+
+// --------------------------------------------------------------------
+   procedure ManageDirCmd()
+   {
+      num nPiece ;
+
+    // 10 = movimento in rapido in Z rispetto a Zero macchina
+      if ( $TcmdType == 10) {
+      }
+     // 20 = arresto preciso
+      elsif ( $TcmdType == 20) {
+         if( $SyntType == _CNC) {
+            g_bDrillIsToWrite = TRUE ;
+            ManageHoleDepth() ;
+         }
+      }
+     // 40 = arresto per rimozione sfridi
+      elsif ( $TcmdType == 40) {
+         if( $SyntType == _CNC) {
+            WriteMachineStop( 1, 0, 0) ;
+         }
+      }
+     // 45 = gestione attacchi ed uscite come comando diretto
+      elsif ( $TcmdType == 45) {
+         if( $SyntType == _CNC) {
+            ManageLeadInOut() ;
+            if( $TCMDPAR1 == 1) {
+               g_IsMach = TRUE ;
+            }
+         }
+      }
+     // 46 = comandi diretti di INIZIO\FINE attacchi ed uscite
+      elsif ( $TcmdType == 46) {
+         if ( $SyntType == _CNC) {
+            if( NOT g_bPSystem) {
+              // only Bladecuts
+               if( $MachType == MACHTYPE_BLADECUT AND NOT g_bBladeSPEP) {
+                  ManageLeadInLeadOutForBlade() ;
+               }
+              // LEAD IN START
+               if( $TCMDPAR1 == 1) {
+                  if( p_bUseOldLeadManager) {
+                     g_IsMach = FALSE ;
+                  }
+                  g_bIsLeadIn = TRUE ;
+               }
+              // LEAD IN END
+               if( $TCMDPAR1 == 2) {
+                  g_bIsLeadIn = FALSE ;
+               }
+              // LEAD OUT START
+               if( $TCMDPAR1 == 3) {
+                  g_bIsLeadOut = TRUE ;
+               }
+              // LEAD OUT END
+               if( $TCMDPAR1 == 4) {
+                  g_bIsLeadOut = FALSE ;
+
+                 // EP management
+                  EndPointMacroCall(3) ;
+               }
+            }
+         }
+      }
+     // 47 = Collegamenti tra percorsi
+      elsif ( $TcmdType == 47) {
+         if( $SyntType == _CNC) {
+            if( $MachType == MACHTYPE_BLADECUT AND NOT g_bBladeSPEP) {
+               ManageLinksForBlade() ;
+            }
+            else {
+               if ( $TCMDPAR1 == 1 ) {
+                  g_bIsLink = TRUE ;
+               }
+               else {
+                  g_bIsLink = FALSE ;
+               }
+            }
+         }
+      }
+     // 50 = descrizione forma utensile
+      elsif ( $TcmdType == 50) {
+         if( $SyntType == _SIM)
+            SimuManageToolShape() ;
+      }
+     // 60 = info ausiliarie
+      elsif ( $TcmdType == 60) {
+      }
+     // 70 = tipo tavola
+      elsif ( $TcmdType == 70) {
+         g_nSubPieceHight = ABS( $TcmdPar9) ;
+         SaveTableData() ;
+      }
+     // 71 = inizio lavorazione su tavola
+      elsif ( $TcmdType == 71) {
+         g_nCurrTable = $TcmdPar1 ;
+      }
+     // 73 = origini
+      elsif ( $TcmdType == 73) {
+      }
+     // 76 = Inizio fase
+      elsif ( $TcmdType == 76) {
+         g_nNumPhase = $TcmdPar1 ;
+         g_nFirstRowWithPiece = -INFINITE ;
+         g_nLastRowWithPiece  =  INFINITE ;
+         if(( $SyntType == _CNC) AND (g_nNumPhase > 1)) {
+            if( g_bHeaderIsToWrite) {
+              // gestione info pezzo (recupero ingombro max e offset da origine)
+               ManageInfoPiece() ;
+               OutHeader() ;
+               OutInfoPiece() ;
+               if ( p_nDispType != DISP_JLX_NO) {
+                  OutJLXHeader() ;
+                  OutJLXWorkPieces() ;
+                  OutJLXInitialScene() ;
+               }
+            }
+         }
+        // azzero il contatore dei pezzi ad inizio fase
+         g_nNumPiece = g_nContPiece ;
+      }
+      // 77 = fine fase
+      elsif ( $TcmdType == 77) {
+
+      }
+     // 81 = Correttore lama
+      elsif ( $TcmdType == 81) {
+         g_nProcMode = $TcmdPar1 - 1 ;
+      }
+     // 82 = Info fori emessi come svuotature con macro
+      elsif ( $TcmdType == 82) {
+      }
+      // 130 = lettura entità geometriche
+      elsif( $TcmdType == 130) {
+         if( $TcmdPar2 == 3 AND $SyntType == _CNC)
+            ManageHoleInfo() ;
+      }
+      // 120 = Info utensile
+      elsif ( $TcmdType == 120) {
+         g_v3ToolRot.x = $TcmdPar1 ;
+         g_v3ToolRot.y = $TcmdPar2 ;
+         g_v3ToolFeed.x = $TcmdPar3 ;
+         g_v3ToolFeed.y = $TcmdPar4 ;
+         g_v3ToolFeed.z = $TcmdPar5 ;
+
+         if ( $SyntType == _CNC) {
+           // saving tool feeds in tool sel instruction string
+            if ( $MachType != MACHTYPE_BLADECUT OR g_bBladeSPEP) {
+               g_sToolSelInstr = GetToolSelect() ;
+            }
+         }
+      }
+     // 1001 = posizionamento riferimenti
+      elsif ( $TcmdType == 1001) {
+      }
+     // 1002 = posizionamento ventose
+      elsif ( $TcmdType == 1002) {
+      }
+     // 1004 = nome del pezzo in proiezione laser
+      elsif ( $TcmdType == 1004) {
+         g_nPieceLaser = GetIndexFromPieceName( $TcmdStr1) ;
+      }
+     // 1101 = dati principali pezzo
+      elsif ( $TcmdType == 1101) {
+         GetInfoPiece( TRUE) ;
+      }
+     // 1102 = dati ausiliari pezzo
+      elsif ( $TcmdType == 1102) {
+         GetInfoPiece( FALSE) ;
+      }
+     // 1103 = dati sottopezzo
+      elsif ( $TcmdType == 1103) {
+         GetInfoUnderPiece() ;
+         if( g_nDimUnderGrZ > 0) {
+            nPiece = GetIndexFromPieceName( $TcmdStr1) ;
+            g_v3DimGre[nPiece].z = g_v3DimGre[nPiece].z + g_nDimUnderGrZ ;
+         }
+      }
+      // 1110 = percorso file forma utensile
+      elsif ( $TcmdType == 1110) then {
+         if( $SyntType == _SIM) {
+            // szTshapeFilePath
+            g_bTShapeFilePath = TRUE ;
+            g_sTShape = "TOD " +  OUTSTR( FALSE, STRSUB( $TcmdStr1, $GeomDir, "%MACHROOT%")) ;
+         }
+      }
+     // 1201 = preselezione prossima testa
+      elsif ( $TcmdType == 1201) {
+      }
+     // 2001 = file di configurazione
+      elsif ( $TcmdType == 2001) {
+      }
+     // 2002 = utensile attrezzato per elenco iniziale
+      elsif ( $TcmdType == 2002) {
+      }
+     // 2004 = elenco lavorazioni da eseguire con abilitazione parametro
+     // EmitMachList=1 nel machine.ppd
+      elsif ( $TcmdType == 2004) {
+         if( $SyntType == _CNC) {
+            ManageMachList() ;
+         }
+      }
+      // 2010 = dichiarazione altro utensile attrezzato su testa a più uscite
+      elsif ( $TcmdType == 2010) {
+         if( $SyntType == _SIM) {
+            GetOtherToolsOnHead() ;
+         }
+      }
+     // 2011 = dichiarazione utensili attrezzati sulla testa multipla
+      elsif ( $TcmdType == 2011) {
+         if( $SyntType == _SIM) {
+            SimuManageShapeTool() ;
+         }
+      }
+     // 2012 = attivazione uscite testa multipla
+      elsif ( $TcmdType == 2012) {
+         if( $SyntType == _CNC) {
+            GetInfoMultDrill() ;
+         }
+         else {
+            ManageMultiDrillForSim() ;
+         }
+      }
+      elsif( $TcmdType == 2013) {
+         if( $SyntType == _SIM) {
+            SimuManageToolHolder() ;
+         }
+      }
+     // 2021 = posizionamento bancaletti
+      elsif ( $TcmdType == 2021) {
+         SetBarInfo() ;
+      }
+     // 2022 = posizionamento riferimenti su bancaletti
+      elsif ( $TcmdType == 2022) {
+      }
+     // 2023 = posizionamento ventose su bancaletti
+      elsif ( $TcmdType == 2023) {
+         if( p_nDispType != DISP_JLX_NO) {
+            SetSubInfo() ;
+         }
+      }
+     // 2024 = posizionamento carrelli su piani
+      elsif ( $TcmdType == 2024) {
+         SetPadInfo() ;
+      }
+     // 2100 - 210x = comandi diretti definibili dall'utente
+      elsif ( $TcmdType >= 2100) {
+         ManageSpecialCommand() ;
+      }
+   }
+
+//---------------------------------------------------------------
+   procedure ManageEndAll()
+   {
+
+      if ( $SyntType == _CNC) {
+         if( p_nHopLang == 1)
+            OutCncLine( OUTSTR( "VIEW0()"), N_FILE_COMMON) ;
+         else
+            OutCncLine( OUTSTR( "EBENE0()"), N_FILE_COMMON) ;
+      }
+      elsif ( $SyntType == _SIM) {
+         OUTCNC( "MVA Z, 600") ;
+         OUTCNC( "MVA X, 0") ;
+         OUTCNC( "MVA Y, 1750") ;
+         OUTCNC( "MVA C, 0") ;
+         OUTCNC( "MVA A, 0") ;
+      }
+   }
+
+// --------------------------------------------------------------------
+   procedure OutMachHeader( string sMach)
+   {
+
+      OutCncLine( OUTSTR( "; ---------------------------------"), g_nFileId) ;
+      OutCncLine( OUTSTR( "; {sMach}"), g_nFileId) ;
+      OutCncLine( OUTSTR( "; ---------------------------------"), g_nFileId) ;
+      if ( p_bOutBearb_kleben)
+         OutCncLine( OUTSTR( "CALL Bearb_kleben()"), g_nFileId) ;
+   }
+
+   //-------------------------------------------------------------------------
+   function GetCurrPieceName( string sNameMach) : string
+   {
+
+      string sResult ;
+      num    nPos ;
+
+      nPos = STRSTR( sNameMach, ",") ;
+      if (nPos > 0)
+         sResult = STRMID( sNameMach, 1, nPos - 1) ;
+      else
+         OUTLOG(TRUE, "^nERROR Restoring filename failed^n") ;
+
+      return sResult ;
+   }
+
+//-------------------------------------------------------------------------
+   function GetIndexFromPieceName( string szName) : num
+   {
+      BOOL     bFind = FALSE ;
+      NUM      nResult ;
+      NUM      nI ;
+     // Ciclo su tutti pezzi alla ricerca del pezzo richiesto
+      nI = 1 ;
+      while ( nI <= N_MAX_PIECES) {
+        // controllo sul nome della lavorazione
+         if ( STRSTR( szName, ",") > 0 ) {
+           // Se trovato esco
+            if ( STRSTR( szName, g_sPieceName[nI] + ",") == 1) {
+               return nI ;
+            }
+         }
+        // controllo sul nome del pezzo
+         else {
+            if ( STRSTR( szName, g_sPieceName[nI]) == 1 AND STRLEN(szName) == STRLEN(g_sPieceName[nI])) {
+               return nI ;
+            }
+         }
+         nI = nI + 1 ;
+      }
+
+      return -1 ;
+   }
+
+//-------------------------------------------------------------------------
+   procedure AdjustXYZ()
+   {
+
+      num    nIndex ;
+      string sName ;
+      VEC3 ptP ;
+
+
+      if ( $MachType != MACHTYPE_LASER){
+         sName = GetCurrPieceName( $MachName) ;
+         nIndex = GetIndexFromPieceName( sName) ;
+      }
+      else {
+         nIndex = 1 ;
+      }
+
+      if( ISSETVAR( $X)) {
+         ptP = VEC3( $X, 0, 0) ;
+
+
+         if ( $PlaneType == 1)
+            ptP.x = ptP.x + (g_v3PosFin[nIndex].x - g_v3PosGre[nIndex].x) ;
+         if( $PlaneType != 1 AND $PlaneType != 7 AND $PLANEYZ != 0 AND $MachType == MACHTYPE_CONTOURING)
+            ptP.x = ptP.x * $PLANEYZ ;
+
+         $X = ptP.x ;
+      }
+      if( ISSETVAR( $Y)) {
+         ptP = VEC3( 0, $Y, 0) ;
+
+         if ( $PlaneType == 1)
+            ptP.y = ptP.y + (g_v3PosFin[nIndex].y - g_v3PosGre[nIndex].y) ;
+         if( $PlaneType != 1 AND $PlaneType != 7 AND $PLANEYZ != 0 AND $MachType == MACHTYPE_CONTOURING)
+            ptP.y = ptP.y * $PLANEYZ ;
+
+         $Y = ptP.y ;
+      }
+      if( ISSETVAR( $I)) {
+         ptP = VEC3( $I, 0, 0) ;
+
+         if ( $PlaneType == 1)
+            ptP.x = ptP.x + (g_v3PosFin[nIndex].x - g_v3PosGre[nIndex].x) ;
+         if( $PlaneType != 1 AND $PlaneType != 7 AND $PLANEYZ != 0 AND $MachType == MACHTYPE_CONTOURING)
+            ptP.x = ptP.x * $PLANEYZ ;
+
+         $I = ptP.x ;
+      }
+      if( ISSETVAR( $J)) {
+         ptP = VEC3( 0, $J, 0) ;
+
+         if ( $PlaneType == 1)
+            ptP.y = ptP.y + (g_v3PosFin[nIndex].y - g_v3PosGre[nIndex].y) ;
+         if( $PlaneType != 1 AND $PlaneType != 7 AND $PLANEYZ != 0 AND $MachType == MACHTYPE_CONTOURING)
+            ptP.y = ptP.y * $PLANEYZ ;
+
+         $J = ptP.y ;
+      }
+
+      if( g_bUseMacroIso) {
+         if( g_nRapid == 1) {
+            g_v3StartPointForMacroIso.x = OPT( ISSETVAR( $X), $X, 0) ;
+            g_v3StartPointForMacroIso.y = OPT( ISSETVAR( $Y), $Y, 0) ;
+            g_v3StartPointForMacroIso.z = OPT( ISSETVAR( $Z), $Z, 0) ;
+         }
+      }
+   }
+
+//----------------------------------------------------------------
+   procedure AdjustFeed()
+   {
+      if( ISSETVAR( $Feed)) {
+        // se la feed che sto scrivendo è diversa rispetto a quella che ho già emesso
+         if( g_nSavedFeed != $Feed) {
+           // controllo che la feed sia stata scritta correttamente ( in mm)
+            if( $Feed / 1000 < 1)
+               OUTLOG( TRUE, g_sErrFeedMM) ;
+            g_nSavedFeed = $Feed ;
+
+            $Su2 = " F" ;
+           // scrivo la variazione di FEED
+            if( $SyntType == _CNC) {
+               if( NOT g_bUseMacroIso) {
+                  if( ( $MachType != MACHTYPE_BLADECUT OR g_bBladeSPEP) AND $MachType != MACHTYPE_DRILL AND $MachType != MACHTYPE_MULTIPLE_DRILL) {
+                     if(( NOT p_bUseOldLeadManager AND g_nLinear > 1) OR (p_bUseOldLeadManager))
+                        OutCncLine( OUTSTR( "CALL _Tvorschub_v5(VAL VORSCHUB:=" + OUTSTR( "{g_nSavedFeed})")), g_nFileId) ;
+                  }
+               }
+            }
+         }
+      }
+
+      if( g_nSavedFeed == VAL_NOT_DEFINED OR g_nSavedFeed == 0) {
+         OutLog( TRUE, g_sErrFeedNotSetted) ;
+      }
+   }
+
+//----------------------------------------------------------------
+   procedure ManageLeadInForMacroIso()
+   {
+      num   nDirX ;
+      num   nDirY ;
+      num   nDirZ ;
+      vec3  vtDirFr ;
+      vec3  vtDirX ;
+      vec3  vtDirY ;
+      vec3  vtDirZ ;
+      vec3  vtMove ;
+      vec3  vtCorr ;
+      vec3  vtDir ;
+
+
+      if ( $MachType == MACHTYPE_CONTOURING OR $MachType == MACHTYPE_CONTWITHANGLE) {
+         vtDirX  = VEC3( $PlaneXx, $PlaneXy, $PlaneXz) ;
+         vtDirY  = VEC3( $PlaneYx, $PlaneYy, $PlaneYz) ;
+         vtDirZ  = VEC3( $PlaneZx, $PlaneZy, $PlaneZz) ;
+         vtDirFr = VEC3( $Vx, $Vy, $Vz) ;
+
+        // calcolo direzione di lavorazione
+         if( ISSETVAR( $X) AND ISSETVAR( $Y) AND ISSETVAR( $Z)) {
+            nDirX = $X - g_v3FirstPoint.x ;
+            nDirY = $Y - g_v3FirstPoint.y ;
+            nDirZ = $Z - g_v3FirstPoint.z ;
+
+            vtDir = VEC3( nDirX, nDirY, nDirZ) ;
+            vtDir = NORMALIZE( vtDir) ;
+         }
+
+        // calcolo il versore correzione
+         if ( g_nToolComp == 1)
+            vtCorr = CROSS( vtDirFr, vtDir) ;
+         elsif( g_nToolComp == 2)
+            vtCorr = CROSS( vtDir, vtDirFr) ;
+
+        // calcolo il movimento del leadout
+         vtMove.x = g_v3FirstPoint.x + ( vtCorr.x * ( ($ToolDiam * 0.5) + N_LEADOUT_DIST)) ;
+         vtMove.y = g_v3FirstPoint.y + ( vtCorr.y * ( ($ToolDiam * 0.5) + N_LEADOUT_DIST)) ;
+         vtMove.z = g_v3FirstPoint.z + ( vtCorr.z * ( ($ToolDiam * 0.5) + N_LEADOUT_DIST)) ;
+
+         OutLineForMacroIso( OUTSTR("; leadin management")) ;
+
+         OutLineForMacroIso( OUTSTR("G0{$NaX}{vtMove.x}{$NaY}{vtMove.y}{$NaZ}{vtMove.z}{$NaA}{$A}{$NaB}{$B}{$Su2}{g_v3ToolFeed.x}")) ;
+         OutLineForMacroIso( OUTSTR( g_sCorrR)) ;
+         //OutLineForMacroIso( OUTSTR("G1{$NaX}{g_v3FirstPoint.x}{$NaY}{g_v3FirstPoint.y}{$NaZ}{g_v3FirstPoint.z}{$NaA}{$A}{$NaB}{$B}{$Su2}{g_v3ToolFeed.x}")) ;
+         OutLineForMacroIso( OUTSTR("G0{$NaX}{g_v3FirstPoint.x}{$NaY}{g_v3FirstPoint.y}{$NaZ}{g_v3FirstPoint.z}{$NaA}{$A}{$NaB}{$B}{$Su2}{g_v3ToolFeed.x}")) ;
+      }
+   }
+
+//----------------------------------------------------------------
+   procedure ManageLeadOutForMacroIso()
+   {
+      num   nDirX ;
+      num   nDirY ;
+      num   nDirZ ;
+      vec3  vtDirFr ;
+      vec3  vtDirX ;
+      vec3  vtDirY ;
+      vec3  vtDirZ ;
+      vec3  vtMove ;
+      vec3  vtCorr ;
+      vec3  vtDir ;
+
+
+      if ( $MachType == MACHTYPE_CONTOURING OR $MachType == MACHTYPE_CONTWITHANGLE) {
+         vtDirX  = VEC3( $PlaneXx, $PlaneXy, $PlaneXz) ;
+         vtDirY  = VEC3( $PlaneYx, $PlaneYy, $PlaneYz) ;
+         vtDirZ  = VEC3( $PlaneZx, $PlaneZy, $PlaneZz) ;
+         vtDirFr = VEC3( $Vx, $Vy, $Vz) ;
+
+        // calcolo direzione di lavorazione
+         if( ISSETVAR( $X) AND ISSETVAR( $Y) AND ISSETVAR( $Z)) {
+            nDirX = $X - g_v3PointPrec.x ;
+            nDirY = $Y - g_v3PointPrec.y ;
+            nDirZ = $Z - g_v3PointPrec.z ;
+
+            vtDir = VEC3( nDirX, nDirY, nDirZ) ;
+            if( vtDir.x != 0 AND vtDir.y != 0 AND vtDir.z != 0) {
+               vtDir = NORMALIZE( vtDir) ;
+            }
+         }
+
+        // calcolo il versore correzione
+         if ( g_nToolComp == 1)
+            vtCorr = CROSS( vtDirFr, vtDir) ;
+         elsif( g_nToolComp == 2)
+            vtCorr = CROSS( vtDir, vtDirFr) ;
+
+        // calcolo il movimento del leadout
+         vtMove.x = $X + ( vtCorr.x * ( ($ToolDiam * 0.5) + N_LEADOUT_DIST)) ;
+         vtMove.y = $Y + ( vtCorr.y * ( ($ToolDiam * 0.5) + N_LEADOUT_DIST)) ;
+         vtMove.z = $Z + ( vtCorr.z * ( ($ToolDiam * 0.5) + N_LEADOUT_DIST)) ;
+
+         OutLineForMacroIso( OUTSTR("; leadout management")) ;
+         OutLineForMacroIso( OUTSTR("G40")) ;
+         //OutLineForMacroIso( OUTSTR("G1{$NaX}{vtMove.x}{$NaY}{vtMove.y}{$NaZ}{vtMove.z}{$NaA}{$A}{$NaB}{$B}{$Su2}{g_v3ToolFeed.z}")) ;
+         OutLineForMacroIso( OUTSTR("G1{$NaX}{vtMove.x}{$NaY}{vtMove.y}{$NaZ}{vtMove.z}{$NaA}{$A}{$NaB}{$B}{$Su2}{g_v3ToolFeed.z}")) ;
+      }
+   }
+//----------------------------------------------------------------
+   procedure ManageRapidForMacroIso()
+   {
+     // Management of First Rapid
+      if( g_nRapid == 1) {
+
+         if( $SyntType == _CNC) {
+            OutCncLine( OUTSTR( g_sTypePlane), g_nFileId) ;
+            ManageMacroIsoFile( TRUE) ;
+            ManageDynSetForMacroIso( TRUE) ;
+            ManageMacroIsoCall() ;
+         }
+         if( $SyntType == _CNC) {
+           // management of leadin
+            OutLineForMacroIso( "G0{$NaX}{$X}{$NaY}{$Y}{$NaA}{$A}{$NaB}{$B}") ;
+            OutLineForMacroIso( "G0{$NaZ}{$Z}") ;
+         }
+         else {
+            SimuManageSafePos() ;
+            if( $MachType != MACHTYPE_MULTIPLE_DRILL)
+               OUTCNC( "G00{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B}") ;
+            else {
+               OUTCNC( "G00{$NaX}{$X}{$NaY}{$Y}{$NaA}{$A}{$NaB}{$B}") ;
+               OUTCNC( g_sActiveDrille) ;
+              // I write now the drill activation, after the XY first movement
+               OUTCNC( "G00{$NaZ}{$Z}") ;
+              // I set it as FALSE in way to not repeat the drill activation
+               g_bHasTobeWriteExit = FALSE ;
+            }
+         }
+      }
+      else {
+         if( $SyntType == _CNC) {
+            OutLineForMacroIso( "G0{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B}") ;
+         }
+         else {
+            OUTCNC( "G00{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B}") ;
+            if( g_bHasTobeWriteExit) {
+              // I write now the drill activation, after the XYZ first movement
+               OUTCNC( g_sActiveDrille) ;
+               g_bHasTobeWriteExit = FALSE ;
+            }
+         }
+      }
+     // memorizzo il punto precedente
+      g_v3PointPrec.x = $X ;
+      g_v3PointPrec.y = $Y ;
+      g_v3PointPrec.z = $Z ;
+   }
+
+//----------------------------------------------------------------
+   procedure ManageRapidMovementForLaser()
+   {
+      if( g_nRapid == 1) {
+         g_sLaserInstr[g_nPieceLaser] = "" ;
+         g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+         g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; LASER PROJECTION^n" ;
+         g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+         if ( p_bOutBearb_kleben)
+            g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "CALL Bearb_kleben()^n" ;
+         g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + g_sToolSelInstr + "^n" ;
+
+         // Dichiarazione del grezzo utilizzando il laser
+         g_sRoughInstr[g_nPieceLaser] = "" ;
+         g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+         g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ROUGH DEFINITION^n" ;
+         g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+         g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "WZF(4444,_VE,_V,_VA,_SD,_ANF,'1')^n" ;
+         g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "Ebene0()^n" ;
+      }
+      if ( $SyntType == _CNC)
+         ManageRapidForLaser() ;
+   }
+
+//----------------------------------------------------------------
+procedure ManageStartLaserMach()
+{
+   if( g_nRapid == 1) {
+      g_sLaserInstr[g_nPieceLaser] = "" ;
+      g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+      g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; LASER PROJECTION^n" ;
+      g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+      if ( p_bOutBearb_kleben)
+         g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "CALL Bearb_kleben()^n" ;
+      g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + g_sToolSelInstr + "^n" ;
+
+      // Dichiarazione del grezzo utilizzando il laser
+      g_sRoughInstr[g_nPieceLaser] = "" ;
+      g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+      g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ROUGH DEFINITION^n" ;
+      g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+      g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "WZF(4444,_VE,_V,_VA,_SD,_ANF,'1')^n" ;
+      g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "Ebene0()^n" ;
+   }
+}
+
+//----------------------------------------------------------------
+procedure ManageRapidMovement()
+{
+   if( p_bUseOldLeadManager)
+      ManageRapidMovement_OLD() ;
+   else
+      ManageRapidMovement_NEW() ;
+
+}
+
+//----------------------------------------------------------------
+   procedure ManageRapidMovement_NEW()
+   {
+      if( $SyntType == _CNC)
+         AdjustXYZ() ;
+
+      if( $SyntType == _CNC) {
+        // Manage laser projection
+         if ( $MachType == MACHTYPE_LASER) {
+            ManageStartLaserMach() ;
+            ManageRapidForLaser() ;
+            g_nLinear = 2 ;
+            g_nRapid = g_nRapid + 1 ;
+            return ;
+         }
+      }
+
+     // write tool activation
+      if( g_nRapid == 1 AND $SyntType == _CNC) {
+         if ( NOT g_bPSystem) {
+            if( ( $MachType != MACHTYPE_BLADECUT OR g_bBladeSPEP) AND $MachType != MACHTYPE_MULTIPLE_DRILL) {
+               OutToolSel() ;
+               ManageDustBlower() ;
+               if ( g_bWriteSquaringMacro ) {
+                  WriteSquaringMacro() ;
+               }
+            }
+         }
+      }
+
+     // if is a MacroIso or is Simulation
+      if( g_bUseMacroIso OR $SyntType == _SIM)
+         ManageRapidForMacroIso() ;
+     // blade cut has a different management
+      elsif( ( $MachType != MACHTYPE_BLADECUT OR g_bBladeSPEP)) {
+         if ( NOT g_bWriteSquaringMacro AND NOT g_bPSystem) {
+            ManageRapidForStdMach() ;
+         }
+      }
+      g_nRapid = g_nRapid + 1 ;
+
+      if ($SyntType == _CNC) {
+        // save last rapid pos
+         g_v3PLastRapid = VEC3($X, $Y, $Z) ;
+      }
+
+      g_nLinear = 1 ;
+
+   }
+
+//----------------------------------------------------------------
+   procedure ManageRapidMovement_OLD()
+   {
+
+      if( $SyntType == _CNC)
+         AdjustXYZ() ;
+
+      if ( $MachType == MACHTYPE_LASER) {
+         if( g_nRapid == 1) {
+            g_sLaserInstr[g_nPieceLaser] = "" ;
+            g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+            g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; LASER PROJECTION^n" ;
+            g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+            if ( p_bOutBearb_kleben)
+               g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + "CALL Bearb_kleben()^n" ;
+            g_sLaserInstr[g_nPieceLaser] = g_sLaserInstr[g_nPieceLaser] + g_sToolSelInstr + "^n" ;
+
+            // Dichiarazione del grezzo utilizzando il laser
+            g_sRoughInstr[g_nPieceLaser] = "" ;
+            g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+            g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ROUGH DEFINITION^n" ;
+            g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "; ---------------------------------^n" ;
+            g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "WZF(4444,_VE,_V,_VA,_SD,_ANF,'1')^n" ;
+            g_sRoughInstr[g_nPieceLaser] = g_sRoughInstr[g_nPieceLaser] + "Ebene0()^n" ;
+         }
+         if ( $SyntType == _CNC)
+            ManageRapidForLaser() ;
+      }
+      else {
+         if( g_bUseMacroIso OR $SyntType == _SIM) {
+            if( g_nRapid == 1 AND $SyntType == _CNC) {
+               if( p_bForceFeedFromKit) {
+                  g_sToolSelInstr = STRGSUB( g_sToolSelInstr, "_VE,", OUTSTR( "{g_v3ToolFeed.x},")) ;
+                  g_sToolSelInstr = STRGSUB( g_sToolSelInstr, "_V,", OUTSTR( "{g_v3ToolFeed.y},")) ;
+                  g_sToolSelInstr = STRGSUB( g_sToolSelInstr, "_VA,", OUTSTR( "{g_v3ToolFeed.z},")) ;
+               }
+
+               if( not p_bAvoidEqualToolCall  OR  g_sToolSelInstr != g_sToolSelInstrOld) {
+                  OutCncLine( OUTSTR( g_sToolSelInstr), g_nFileId) ;
+                  g_sToolSelInstrOld = g_sToolSelInstr ;
+                  if ( g_bWriteSquaringMacro ) {
+                     WriteSquaringMacro() ;
+                  }
+               }
+            }
+
+            ManageRapidForMacroIso() ;
+         }
+         else {
+
+            if( ( $MachType != MACHTYPE_BLADECUT OR g_bBladeSPEP)) {
+               if( g_nRapid == 1) {
+                  if( p_bForceFeedFromKit) {
+                     g_sToolSelInstr = STRGSUB( g_sToolSelInstr, "_VE,", OUTSTR( "{g_v3ToolFeed.x},")) ;
+                     g_sToolSelInstr = STRGSUB( g_sToolSelInstr, "_V,", OUTSTR( "{g_v3ToolFeed.y},")) ;
+                     g_sToolSelInstr = STRGSUB( g_sToolSelInstr, "_VA,", OUTSTR( "{g_v3ToolFeed.z},")) ;
+                    // g_sToolSelInstr = STRGSUB( g_sToolSelInstr, "_SD,", OUTSTR( "{g_v3ToolRot.x},")) ;
+                  }
+
+                 //OUTCNC( "; Tool Selection") ;
+                  if( not p_bAvoidEqualToolCall  OR  g_sToolSelInstr != g_sToolSelInstrOld) {
+                     OutCncLine( OUTSTR( g_sToolSelInstr), g_nFileId) ;
+                     g_sToolSelInstrOld = g_sToolSelInstr ;
+                     if ( g_bWriteSquaringMacro ) {
+                        WriteSquaringMacro() ;
+                        g_bWriteSquaringMacro = FALSE ;
+                     }
+                  }
+               }
+
+               ManageRapidForStdMach() ;
+            }
+         }
+      }
+
+      g_nRapid = g_nRapid + 1 ;
+   }
+
+
+//----------------------------------------------------------------
+   procedure ManageLinearForMacroIso()
+   {
+
+     // memorizzo il punto precedente
+      if ( NOT g_bIsFirstLinear) {
+         g_v3PointPrec.x = $PreX ;
+         g_v3PointPrec.y = $PreY ;
+         g_v3PointPrec.z = $PreZ ;
+      }
+
+      if( $SyntType == _CNC) {
+         AdjustCorre() ;
+
+        // se è il primo lineare emetto il leadin e il primo rapido
+         if ( g_bIsFirstLinear) {
+            g_bIsFirstLinear = FALSE ;
+         }
+
+        //if ( STRLEN( g_sCorrR) > 0)
+        //    OutLineForMacroIso( g_sCorrR) ;
+         OutLineForMacroIso( "G1{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B}{$Su2}{g_v3ToolFeed.y}") ;
+      }
+      else
+         OUTCNC( "G01{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B}") ;
+   }
+
+//----------------------------------------------------------------
+   procedure ManageLinearForBladeMach()
+   {
+
+      // Leggo il primo punto fino a quando sono nel LEAD-IN e non è iniziata la lavorazione
+      if( g_bIsLeadIn AND NOT g_bStartMachBlade) {
+         g_bFirstMoveForBlade = TRUE ;
+         ManageLinearForStdMach() ;
+      }
+      elsif( g_bIsLeadOut AND g_bIsLink AND NOT g_bStartMachBlade) {
+         g_bFirstMoveForBlade = TRUE ;
+         ManageLinearForStdMach() ;
+      }
+      elsif( NOT g_bIsLeadIn AND g_bStartMachBlade) {
+         ManageLinearForStdMach() ;
+      }
+      elsif( NOT g_bIsLeadOut AND NOT g_bEndMachBlade) {
+         ManageLinearForStdMach() ;
+      }
+   }
+
+//----------------------------------------------------------------
+   procedure ManageLinearMovement()
+   {
+
+      if( $SyntType == _CNC)
+         AdjustXYZ() ;
+
+      if ( $MachType == MACHTYPE_LASER) {
+         if ( $SyntType == _CNC)
+            ManageLinearForStdMach() ;
+      }
+      else {
+         AdjustFeed() ;
+         if( g_bUseMacroIso OR $SyntType == _SIM)
+            ManageLinearForMacroIso() ;
+         else {
+            if( $MachType == MACHTYPE_BLADECUT AND NOT g_bBladeSPEP)
+               ManageLinearForBladeMach() ;
+            else
+               ManageLinearForStdMach() ;
+         }
+      }
+
+      if( $SyntType == _CNC) {
+         if( NOT g_bSkipGeometry) {
+            if ( g_bIsFirstLinear)
+               g_bIsFirstLinear = FALSE ;
+
+            g_nLinear = g_nLinear + 1 ;
+         }
+      }
+   }
+
+//----------------------------------------------------------------
+   procedure ManageArcForMacroIso()
+   {
+
+     // memorizzo il punto precedente
+      if ( NOT g_bIsFirstLinear) {
+         g_v3PointPrec.x = $PreX ;
+         g_v3PointPrec.y = $PreY ;
+         g_v3PointPrec.z = $PreZ ;
+      }
+
+      AdjustCorre() ;
+
+      if ( g_bIsFirstLinear) {
+         g_bIsFirstLinear = FALSE ;
+      }
+
+      if ( $R > 0.001) {
+         AdjustCorre() ;
+         if( $SyntType == _CNC) {
+           //if ( STRLEN( g_sCorrR) > 0)
+              // OutLineForMacroIso( g_sCorrR) ;
+            OutLineForMacroIso( OUTSTR( "G{$ArcType}{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B} I{$I} J{$J}{$Su2}{g_nSavedFeed}")) ;
+         }
+         else
+            OUTCNC( OUTSTR( "G0{$ArcType}{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B} I{$I} J{$J}")) ;
+      }
+      else {
+         if( $SyntType == _CNC) {
+            AdjustCorre() ;
+          //if ( STRLEN( g_sCorrR) > 0)
+          //     OutLineForMacroIso( g_sCorrR) ;
+            OutLineForMacroIso( OUTSTR( "G1{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B}{$Su2}{g_nSavedFeed}")) ;
+         }
+         else
+            OUTCNC( "G01{$NaX}{$X}{$NaY}{$Y}{$NaZ}{$Z}{$NaA}{$A}{$NaB}{$B}") ;
+      }
+   }
+
+//----------------------------------------------------------------
+   procedure ManageArcMovement()
+   {
+
+      if( $SyntType == _CNC)
+         AdjustXYZ() ;
+
+      if ( $MachType == MACHTYPE_LASER) {
+         if ( $SyntType == _CNC) {
+            ManageArcForStdMach() ;
+         }
+      }
+      else {
+         AdjustFeed() ;
+        // Macro Iso or simulation
+         if( g_bUseMacroIso OR $SyntType == _SIM) {
+            ManageArcForMacroIso() ;
+         }
+         else {
+           // Standard arc
+            ManageArcForStdMach() ;
+         }
+      }
+
+      g_nLinear = g_nLinear + 1 ;
+   }
+
+//----------------------------------------------------------------
+   function IsMillingMach( NUM nMachType) : BOOL
+   {
+      if ( g_bWriteSquaringMacro) {
+         return FALSE ;
+      }
+      if ( g_bUseMacroIso OR g_bForceUseMacroIso) {
+         return FALSE ;
+      }
+
+      if( nMachType == MACHTYPE_COUNTERSINK ) {
+         return TRUE ;
+      }
+      if( nMachType == MACHTYPE_CONTOURING ) {
+         return TRUE ;
+      }
+      if( nMachType == MACHTYPE_POCKETING ) {
+         return TRUE ;
+      }
+      if( nMachType == MACHTYPE_ENGRAVING ) {
+         return TRUE ;
+      }
+      if( nMachType == MACHTYPE_CONTWITHANGLE ) {
+         return TRUE ;
+      }
+      if( nMachType == MACHTYPE_SURF_ROUGH ) {
+         return TRUE ;
+      }
+      if( nMachType == MACHTYPE_SURF_FINISH ) {
+         return TRUE ;
+      }
+     // contouring with blade
+      if( g_bBladeSPEP) {
+         return TRUE ;
+      }
+
+      return FALSE ;
+   }
+
+//----------------------------------------------------------------
+   procedure WritePSystemMacro(VEC3 v3MacroPoint)
+   {
+      STRING   szTemp = "" ;
+      STRING   szTemp2 = "" ;
+      NUM      nDiam = 0 ;
+
+     // Side Clamex (Vertical Head)
+      if ( ABS( g_v3ClamexPlaneRefZ.z) == 1) {
+        // front and back side
+         if ( ABS( g_v3ClamexPlaneRefY.y) == 1) {
+            if ( p_bCampusvers7) {
+               szTemp = P_SYSTEM_X_H_V7 ;
+            }
+            else {
+               szTemp = P_SYSTEM_X_H_V6 ;
+            }
+         }
+        // left and right side
+         elsif( ABS( g_v3ClamexPlaneRefX.y) == 1) {
+            if ( p_bCampusvers7) {
+               szTemp = P_SYSTEM_Y_H_V7 ;
+            }
+            else {
+               szTemp = P_SYSTEM_Y_H_V6 ;
+            }
+         }
+      }
+     // Vertical Clamex X
+      elsif ( ABS( g_v3ClamexPlaneRefX.y) == 1) {
+         if ( p_bCampusvers7) {
+            szTemp = P_SYSTEM_X_V_V7 ;
+         }
+         else {
+            szTemp = P_SYSTEM_X_V_V6 ;
+         }
+      }
+     // Vertical Clamex Y
+      elsif ( ABS( g_v3ClamexPlaneRefX.x) == 1) {
+         if ( p_bCampusvers7) {
+            szTemp = P_SYSTEM_Y_V_V7 ;
+         }
+         else {
+            szTemp = P_SYSTEM_Y_V_V6 ;
+         }
+      }
+     // Calc diam value
+      if ( g_nPSystemType == -1 ) {
+         nDiam = P_SYSTEM_DIAM[1] ;
+         g_nPSystemType = 0 ;
+      }
+      else {
+         nDiam = P_SYSTEM_DIAM[g_nPSystemType + 1] ;
+      }
+      szTemp2 = NUMTOSTRING( nDiam, 0, 2) ;
+      szTemp = STRGSUB( szTemp, "<PARAM-DIAM>", szTemp2) ;
+      szTemp2 = NUMTOSTRING( v3MacroPoint.x, 0, 3) ;
+      szTemp = STRGSUB( szTemp, "<PARAM-X>", szTemp2) ;
+      szTemp2 = NUMTOSTRING( v3MacroPoint.y, 0, 3) ;
+      szTemp = STRGSUB( szTemp, "<PARAM-Y>", szTemp2) ;
+      szTemp2 = NUMTOSTRING( g_nPSystemType, 0, 0) ;
+      szTemp = STRGSUB( szTemp, "<PARAM-ID>", szTemp2) ;
+
+      OutCncLine( OUTSTR( szTemp), g_nFileId) ;
+   }
+
+//----------------------------------------------------------------
+   procedure WriteKeepPieceMacro()
+   {
+      STRING   szOut = "" ;
+
+
+      szOut = "CALL Keep_Part_V7 ( VAL " ;
+      szOut = szOut + "POSX:=" + NUMTOSTRING( g_apKeepPiecePos[1].x, 0, 3) ;
+      szOut = szOut + ",POSY:=" + NUMTOSTRING( g_apKeepPiecePos[1].y, 0, 3) ;
+      szOut = szOut + ",POSZ:=" + NUMTOSTRING( g_apKeepPiecePos[1].z, 0, 3) ;
+      szOut = szOut + ",POSX2:=" + NUMTOSTRING( g_apKeepPiecePos[2].x, 0, 3) ;
+      szOut = szOut + ",POSY2:=" + NUMTOSTRING( g_apKeepPiecePos[2].y, 0, 3) ;
+      szOut = szOut + ",POSZ2:=" + NUMTOSTRING( g_apKeepPiecePos[2].z, 0, 3) ;
+      szOut = szOut + ",ASLINE:=" + OPT( g_bKeepPieceAsLine, "1", "0") ;
+      szOut = szOut + ",ESXY:=1,ESZ:=0,ESXY2:=1,ESZ2:=0)" ;
+
+      OutCncLine( OUTSTR( szOut), g_nFileId) ;
+     // reset
+      g_bKeepPieceEnable = FALSE ;
+   }
+
+//----------------------------------------------------------------
+   procedure GlobalResetOnStartMach()
+   {
+     // reset of the Dust Blower
+      g_bDustBlower = FALSE ;
+     // reset of tool call
+      g_sToolSelInstr = "" ;
+     // reset first linear
+      g_bIsFirstLinear = TRUE ;
+     // reset linked machining
+      g_bLinkedMach = FALSE ;
+
+      if ( $SyntType == _CNC ) {
+        // reset for clamex
+         g_bIsClamex = FALSE ;
+        // Inizializzo la FEED
+         g_nSavedFeed = VAL_NOT_DEFINED ;
+         g_bAddLateralComp = FALSE ;
+      }
+   }
+
+//----------------------------------------------------------------
+   procedure EndPointMacroCall( NUM nPhase)
+   {
+      /*
+         nPhase :
+             - 1 = End machining
+                -> only for tool center machining (except pocketings)
+                -> for contourings only if the step type is "all linear"
+
+             - 2 = Linear/Arc
+                -> only for machining with tool correction
+                -> writes the end point if it's the last point with corr (141|142)
+
+             - 3 = LeadOut end
+                -> only for tool center machining
+                -> only if pocketing
+                -> or if contouring but with "one way" step type
+      */
+
+     // Old lead in management -> returns
+      if ( p_bUseOldLeadManager ) {
+         return ;
+      }
+
+     // ### End machining ###
+      if ( nPhase == 1 ) {
+        // Pocketing machining -> End Point is written with LeadOut -> returns
+         if ( $MachType == MACHTYPE_POCKETING) {
+            return ;
+         }
+        // Engraving machining -> End Point is written with LeadOut -> returns
+         if ( $MachType == MACHTYPE_ENGRAVING) {
+            return ;
+         }
+        // Surface finish machining -> End Point is written with LeadOut -> returns
+         if ( $MachType == MACHTYPE_SURF_FINISH) {
+            return ;
+         }
+        // Countersink machining -> End Point is written with LeadOut -> returns
+         if ( $MachType == MACHTYPE_COUNTERSINK) {
+            return ;
+         }
+
+        // Only if working in Tool Center
+         if ( g_nToolComp == 0 ) {
+           // only if it is a contouring
+            if ( $MachType == MACHTYPE_CONTOURING  OR  $MachType == MACHTYPE_CONTWITHANGLE) {
+              // control the step type
+               if ( g_nStepType == N_STEP_TYPE_ALL_LINEAR) {
+                  OutCncLine( "; ######## END MACH TYPE = 1", g_nFileId ) ;
+                 // write EP macro
+                  ManageEndMachOnMill() ;
+               }
+            }
+           // if it is any other kind of machining
+            else {
+               OutCncLine( "; ######## END MACH TYPE = 1", g_nFileId ) ;
+              // write EP macro
+               ManageEndMachOnMill() ;
+            }
+         }
+
+      }
+     // ### Linear/Arc movement ###
+      elsif ( nPhase == 2 ) {
+        // The correction set to 141/142 represent the LAST point with side correction
+        // End Point for machining with tool correction
+         if ( g_nToolComp != 0 AND ( $CorrSide == 141  OR  $CorrSide == 142)) {
+            OutCncLine( "; ######## END MACH TYPE = 2", g_nFileId ) ;
+           // write EP macro
+            ManageEndMachOnMill() ;
+         }
+
+      }
+     // ### LeadOut end ( 46 4 ) ###
+      elsif ( nPhase == 3 ) {
+        // Only if working in tool center
+         if ( g_nToolComp == 0 ) {
+           // if it is a pocketing
+            if ( $MachType == MACHTYPE_POCKETING) {
+               OutCncLine( "; ######## END MACH TYPE = 3", g_nFileId ) ;
+              // write EP macro
+               ManageEndMachOnMill() ;
+            }
+            elsif ( $MachType == MACHTYPE_ENGRAVING ) {
+               OutCncLine( "; ######## END MACH TYPE = 3", g_nFileId ) ;
+              // write EP macro
+               ManageEndMachOnMill() ;
+            }
+            elsif ( $MachType == MACHTYPE_SURF_FINISH ) {
+               OutCncLine( "; ######## END MACH TYPE = 3", g_nFileId ) ;
+              // write EP macro
+               ManageEndMachOnMill() ;
+            }
+            elsif ( $MachType == MACHTYPE_COUNTERSINK ) {
+               OutCncLine( "; ######## PHASE = 3", g_nFileId ) ;
+              // write EP macro
+               ManageEndMachOnMill() ;
+            }
+           // or if it is a contouring
+            elsif ( $MachType == MACHTYPE_CONTOURING  OR  $MachType == MACHTYPE_CONTWITHANGLE) {
+              // with One way step type
+               if ( g_nStepType == N_STEP_TYPE_ONE_WAY ) {
+                  OutCncLine( "; ######## END MACH TYPE = 3", g_nFileId ) ;
+                 // write EP macro
+                  ManageEndMachOnMill() ;
+               }
+            }
+         }
+
+      }
+     // ### LeadOut info ( 45 2 ) ###
+      elsif ( nPhase == 4 ) {
+        // Only if the lead out type is "None"
+         if ( g_nTypeLeadOut == 0 ) {
+           // if working with tool correction
+            if ( g_nToolComp != 0 ) {
+               OutCncLine( "; ######## END MACH TYPE = 4", g_nFileId ) ;
+              // write EP macro
+               ManageEndMachOnMill() ;
+            }
+         }
+
+      }
+   }
+
+   {
+   }

@@ -1,0 +1,92 @@
+//----------------------------------------------------------------------------
+// Descrizione comandi NCHops
+//----------------------------------------------------------------------------
+
+
+DIRECT_CMD
+   TYPE=1
+   CAPTION=MACHINE STOP
+   NUMPAR1=PARK(1-LEFT;2-RIGHT)
+   NUMPAR2=POSX
+   NUMPAR3=POSY
+   STRPAR1=KOMMENTAR
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=2
+   CAPTION=NO STOP
+   NUMPAR1=PARK(11-NOSTOP)
+   NUMPAR2=POSX
+   NUMPAR3=POSY
+   STRPAR1=KOMMENTAR
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=3
+   CAPTION=ISO GENERATION PATH
+   STRPAR1=PATH
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=4
+   CAPTION=MACROISO
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=5
+   CAPTION=Easy Loading
+   NUMPAR1=Type
+   COMBO1VALUES=Clamps,0,References Push,1, References Pull,2
+   NUMPAR2=Pos Y1
+   NUMPAR3=Pos Y2
+   NUMPAR4=Pos Y3
+   NUMPAR5=Pos Y4
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=6
+   CAPTION=Table Config
+   STRPAR1=Name
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=7
+   CAPTION=Personalized piece height (directly on bars)
+   NUMPAR1=Height
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=8
+   CAPTION=SQUADRATURA
+   NUMPAR1=Depth
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=9
+   CAPTION=Blade SP-EP
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=10
+   CAPTION=P-System
+   NUMPAR1=Type
+   COMBO1VALUES=Clamex P-10,0,Clamex P-14,1,Clamex P-15,2,Tenso P-14,3,Bisco P-10(WKG),4,Bisco P-14(WKG),5,Bisco P-15(WKG),6
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=11
+   CAPTION=Keep Pos
+   NUMPAR1=Type
+   COMBO1VALUES=Point,0,Line,1
+   NUMPAR2=X1
+   NUMPAR3=Y1
+   NUMPAR4=Z1
+   NUMPAR5=X2
+   NUMPAR6=Y2
+   NUMPAR7=Z2
+END_DIRECT_CMD
+
+DIRECT_CMD
+   TYPE=12
+   CAPTION=Laser geometry
+END_DIRECT_CMD

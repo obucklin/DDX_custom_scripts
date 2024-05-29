@@ -1,0 +1,862 @@
+// **********************************************************************
+//  PROCEDURE - FUNZIONI - VARIABILI COMUNI                             *
+// **********************************************************************
+// Cliente :                                                            *
+// **********************************************************************
+// Modifiche:                                                           *
+// 26.05.16   LF   Prima Versione                                       *
+// **********************************************************************
+
+// ----------------------------------------------------------------------
+// COSTANTI
+// ----------------------------------------------------------------------
+num    const N_TYPE_HEAD_VERT            = 11 ;
+num    const N_TYPE_HEAD_5AX             = 51 ;
+num    const N_TYPE_HEAD_HORIZ           = 37 ;
+num    const N_TYPE_HEAD_UNDER           = 71 ;
+num    const N_TYPE_HEAD_AGGRE5A4U_U1    = 56 ;
+num    const N_TYPE_HEAD_AGGRE5A4U_U2    = 57 ;
+num    const N_TYPE_HEAD_AGGRE5A4U_U3    = 58 ;
+num    const N_TYPE_HEAD_AGGRE5A4U_U4    = 59 ;
+num    const N_TYPE_HEAD_AGGRE3A2U_U1    = 35 ;
+num    const N_TYPE_HEAD_AGGRE3A2U_U2    = 36 ;
+num    const N_TYPE_HEAD_AGGRE3A4UROT_U1 = 31 ;
+num    const N_TYPE_HEAD_AGGRE3A4UROT_U2 = 32 ;
+num    const N_TYPE_HEAD_AGGRE3A4UROT_U3 = 33 ;
+num    const N_TYPE_HEAD_AGGRE3A4UROT_U4 = 34 ;
+num    const N_TYPE_HEAD_DRILLER         = 61 ;
+num    const N_TYPE_HEAD_AGGRE3A4U_U1    = 21 ;
+num    const N_TYPE_HEAD_AGGRE3A4U_U2    = 22 ;
+num    const N_TYPE_HEAD_AGGRE3A4U_U3    = 23 ;
+num    const N_TYPE_HEAD_AGGRE3A4U_U4    = 24 ;
+num    const N_TYPE_HEAD_AGGRE_TILT      = 41 ;
+
+num    const H_NONE                      = -1 ;         // testa non definita
+num    const H_3AXIS_HEAD                = 0 ;          // testa 3 assi
+num    const H_4AXIS_HEAD                = 1 ;          // testa 4 assi
+num    const H_5AXIS_HEAD                = 2 ;          // testa 5 assi
+num    const H_HORIZ_HEAD                = 3 ;          // testa orizzontale
+num    const H_AGGRE_HEAD                = 4 ;          // aggregato su testa 4 assi
+num    const H_DASOTTO_HEAD              = 5 ;          // rinvio da sotto su testa 4 assi
+num    const H_ROTANTE_HEAD              = 6 ;          // rinvio rotante su testa 4 assi
+num    const H_DRU_HEAD                  = 7 ;          // gruppo a forare
+num    const H_BLADEONDRU_HEAD           = 8 ;          // lama su gruppo a forare
+num    const H_TASTAT_HEAD               = 9 ;          // tastatore
+num    const H_RDRU_HEAD                 = 10 ;         // gruppo a forare rotante
+num    const H_4AXIS_PNU_ATC             = 11 ;        // testa 4 assi con attivazione pneumatica
+num    const H_AGGRE_5AX_HEAD            = 12 ;        // Aggregato su testa 5 assi
+num    const H_ANUBA_AUTO                = 13 ;        // testa 5 assi per anubatura con avvitamento
+num    const BLADE_TYPE_TURNAROUND       = 88 ;
+
+num    const N_TABLE_MOD_PENDOLAR        = 3 ;
+num    const N_TABLE_MOD_SINGLE          = 1 ;
+num    const N_TABLE_MOD_UNIQUE          = 2 ;
+num    const N_TABLE_TYPE_FLAT           = 1 ;
+num    const N_TABLE_TYPE_MODULES        = 2 ;
+num    const N_TABLE_TYPE_RULED          = 3 ;
+num    const N_TABLE_TYPE_MOBILE         = 4 ;
+num    const N_TABLE_TYPE_POPUP          = 5 ;
+num    const N_TABLE_TYPE_BASCULANT      = 6 ;
+num    const N_TABLE_TYPE_CARRIAGE       = 7 ;
+num    const N_TABLE_TYPE_EPS            = 8 ;
+
+num    const PLANE_TOP                   = 0 ;
+num    const PLANE_FRONT                 = 2 ;
+num    const PLANE_BACK                  = 1 ;
+num    const PLANE_LEFT                  = 3 ;
+num    const PLANE_RIGHT                 = 4 ;
+num    const PLANE_BOTTOM                = 5 ;
+num    const PLANE_GENERIC               = 6 ;
+num    const N_TABLE_UNIQUE              = 3 ;
+num    const N_TABLE_DX                  = 2 ;
+num    const N_TABLE_SX                  = 1 ;
+num    const INFINITE                    = 99999 ;
+num    const VAL_NOT_DEFINED             = -INFINITE ;
+
+num    const  MACHTYPE_COUNTERSINK       = 29 ;
+num    const  MACHTYPE_DRILL             = 101 ;
+num    const  MACHTYPE_MULTIPLE_DRILL    = 102 ;
+num    const  MACHTYPE_CONTOURING        = 103 ;
+num    const  MACHTYPE_POCKETING         = 104 ;
+num    const  MACHTYPE_ENGRAVING         = 105 ;
+num    const  MACHTYPE_BLADECUT          = 106 ;
+num    const  MACHTYPE_DRILL_RDRU        = 107 ;
+num    const  MACHTYPE_CONTWITHANGLE     = 108 ;
+num    const  MACHTYPE_SURF_ROUGH        = 110 ;
+num    const  MACHTYPE_SURF_FINISH       = 111 ;
+num    const  MACHTYPE_5AX_FINISH        = 112 ;
+num    const  MACHTYPE_ROUGHSURF_LATHE   = 118 ;
+num    const  MACHTYPE_FINISHSURF_LATHE  = 119 ;
+num    const  MACHTYPE_LASER             = 124 ;
+
+num    const BLADE_ENGINE_SIDE_DX        = 2 ;
+num    const BLADE_ENGINE_SIDE_SX        = 1 ; 
+num    const BLADE_SIDE_DX               = 2 ;
+num    const BLADE_SIDE_SX               = 1 ;
+num    const BLADE_SIDE_CE               = 0 ;
+num    const SPEED_ROT_CW                = 1 ;
+num    const SPEED_ROT_CCW               = 2 ;
+
+  // Punti di controllo sulle lame -----------------------------------------------
+num    const N_INTERNAL = 0 ;
+num    const N_MIDDLE   = 1 ;
+num    const N_EXTERNAL = 2 ;
+num    const N_MILL     = 3 ;
+
+// Identificatori moduli (riferimenti e barre) in info disposizione -------------
+string const STR_MOD2 = "Mod2_" ;
+string const STR_MOD1 = "Mod1_" ;
+
+// Tipi asse C -----------------------------------------------------------------
+num const AX_C_LINEAR   = 0 ; // Lineare solito 5 assi
+num const AX_C_ROLLOVER = 1 ; // Roll-over solito 4 assi
+
+num    const  N_DIST_SAFE_FROM_CLAMPS    = 100 ;
+
+string const ISO_FILE_EXT_COMMON         = ".CNC" ;
+
+num    const N_MAX_ORIGIN                = 20 ;
+num    const N_MAX_LAV                   = 100 ;
+string const S_IS_BLADE_ON_DRU           = "BOD=" ;
+string const S_IS_AGGRE                  = "ISAG=" ;    // HeadInfo    -> la testa dichiarata è un aggregato
+string const S_SMOPATH                   = "SMO=" ;     // HeadInfo    -> variabile nel PPF che rappresenta l'aggre nello smo
+string const S_TOOL_EXIT                 = "TEX=" ;     // HeadInfo    -> uscita dell'aggregato
+string const S_TYPE_C                    = "TYC=" ;     // HeadInfo    -> tipo di asse C: vedi sotto AX_C_LINEAR e AX_C_ROLLOVER
+string const S_BRAKE_A                   = "BRK=" ;     // HeadInso    -> presenza freno su asse A
+string const S_HEAD_TYPE                 = "TYPH=" ;    // HeadInfo    -> dichiarazione esplicita tipo di testa (per teste speciali)
+string const S_ISARC                     = "ISARC=" ;   // Note pezzo  -> pezzo è un arco (PowerWIN)
+string const S_WORK_ON_L                 = "WOL=" ;     // Note pezzo  -> asportazione su testa SX
+string const S_WORK_ON_R                 = "WOR=" ;     // Note pezzo  -> asportazione su testa DX
+string const S_SETUP_FILE                = "ASTP=" ;    // Info Gruppo -> File di setup caricato
+string const S_PNEUS_HEAD                = "PNU=" ;
+string const S_PNU_ACT_HEAD              = "PNUACT=" ;
+
+// ----------------------------------------------------------------------
+// VARIABILI
+// ----------------------------------------------------------------------
+num    g_nDimGrX      = 0 ;                        // Dimensione pezzo corrente (X)
+num    g_nDimGrY      = 0 ;                        // Dimensione pezzo corrente (Y) 
+num    g_nDimGrZ      = 0 ;                        // Dimensione pezzo corrente (Z)
+num    g_nDimUnderGrZ = 0 ;                        // Dimensione sottopezzo corrente (Z)
+num    g_nNumOrdPz    = 0 ;                        // numero d'ordine del pezzo corrente
+num    g_nCurrPhase   = 0 ;                        // numero fase corrente
+num    g_nNumPiece    = 0 ;                        // contatore dei pezzi
+num    g_nLastB       = 0 ;
+num    g_nLastA       = 0 ;
+num    g_nLastC       = 0 ;
+num    g_nLastZ       = 0 ;
+num    g_nLastX       = 0 ;
+num    g_nLastY       = 0 ;
+num    g_nCurrPiece   = 1 ;
+num    g_nGroup       = 0 ;                        // Gruppo in lavoro
+num    g_nGroupPrec   = 0 ;                        // Gruppo precedente in lavoro
+num    g_nVacuumMaxHeight = 0 ;                    // altezza massima delle ventose presenti (riferimento della nostra origine)
+num    g_nOfsZOrig = 0 ;                           // calcolo dell'offset Z dell'origine rispetto alla ventosa (se non ho tutte le morse della stessa altezza)
+num    g_nTableUse ;                               // Tavola in utilizzo:  // tavola SX - Tavola Unica - Tavola pendolare
+num    g_nTableType ;                              // Table type: FLAT, BAR, etc
+num    g_nCurrToolSpeedSense ;                     // Sense of rotation of the tool (from DIRCMD 120)
+num    g_anCurrToolSpeed[2] ;                      // Struct with SPEED info of the current tool (from DIRCMD 120)
+num    g_anCurrToolFeed[3] ;                       // Struct with FEED info of the current tool (from DIRCMD 120)
+num    g_nNumOrdPiece[N_MAX_PIECES] ;              // struttura contenente il numero d'ordine di tutti i pezzi
+num    g_nTableForPiece[N_MAX_PIECES] ;
+string g_sPieceName[N_MAX_PIECES] = "" ;           // nome del pezzo corrente
+vec3   g_vTableSize ;
+vec3   g_v3TableOfsOrig ;
+vec3   g_pGlob ;
+vec3   g_pMinPz ;                                  // Posizione MINIMA (punto in basso a SX) del FINITO
+vec3   g_pMaxPz ;                                  // Posizione MASSIMA (punto in alto a DX) del FINITO
+vec3   g_pMinGr ;                                  // Posizione MINIMA (punto in basso a SX) del GREZZO
+vec3   g_pMaxGr ;                                  // Posizione MASSIMA (punto in alto a DX) del GREZZO
+vec3   g_v3PosGre[N_MAX_PIECES] ;                  // struttura contenente la posizione in X,Y,Z di tutti i pezzi (grezzo)
+vec3   g_v3PosGrePrec[N_MAX_PIECES] ;              // struttura contenente la posizione in X,Y,Z di tutti i pezzi
+vec3   g_v3PosFin[N_MAX_PIECES] ;                  // struttura contenente la posizione in X,Y,Z di tutti i pezzi (finito)
+vec3   g_v3DimGre[N_MAX_PIECES] ;                  // struttura contenente le dimensioni grezze in X,Y,Z di tutti i pezzi 
+vec3   g_v3DimGrePrec[N_MAX_PIECES] ;              // struttura contenente le dimensioni grezze in X,Y,Z di tutti i pezzi 
+vec3   g_v3DimFin[N_MAX_PIECES] ;                  // struttura contenente le dimensioni finite in X,Y,Z di tutti i pezzi
+vec3   g_v3LastVFre ;
+
+string g_sToolPosSetUp[N_MAX_LAV]                    = "" ;
+string g_sToolNameSetUp[N_MAX_LAV]                   = "" ;
+string g_sMachList[N_MAX_LAV]                        = "" ;
+string g_sMachToolList[N_MAX_LAV]                    = "" ;
+string g_sToolsCorre[N_MAX_LAV]                      = "" ;
+
+num    g_nToolsLen[N_MAX_LAV]                        = 0 ;
+num    g_nToolsDiam[N_MAX_LAV]                       = 0 ;
+num    g_nMachToolSpeed[N_MAX_LAV]                   = 0 ;       // vettore con le velocità massime dell'utensile
+num    g_nMachToolGrp[N_MAX_LAV]                     = 0 ;       // vettore con i gruppi di ciascuna lavorazione
+num    g_nFullMachToolSpeed[N_MAX_LAV]               = 0 ;       // vettore con le velocità massime dell'utensile
+num    g_nFullMachToolGrp[N_MAX_LAV]                 = 0 ;       // vettore con i gruppi di ciascuna lavorazione
+
+num    g_nMachCont                                    = 0 ;
+num    g_nNumToolSetUp                                = 0 ;
+
+// variabili per TCP
+vec3   g_vStoredPos ;
+vec3   g_vTip ;
+
+// variabili per gestione origine da DISP
+BOOL   g_bReadInfoOrig = FALSE ;
+NUM    g_nCurrOrig = 1 ;
+NUM    g_nCurrOrig_TabSx = 1 ;
+NUM    g_nCurrOrig_TabDx = 1 ;
+STRING g_sOrigName[N_MAX_ORIGIN] ;
+VEC3   g_v3OrigPos[N_MAX_ORIGIN] ;
+
+//----------------------------------------------------------------
+   procedure RunAuxFiles() 
+   {
+     // Execution of file --> Machine Logic
+      run $SyntDir + "\" + g_sPPLFile ;
+      OUTDEB( 1, "PPL File loaded") ;
+     // Execution of file --> Customization
+      run $SyntDir + "\" + g_sPPPFile ;
+      OUTDEB( 1, "PPP File loaded") ;
+     // Execution of file --> Machine language
+      run $SyntDir + "\" + g_sLNGFile ;
+      OUTDEB( 1, "LNG File loaded") ;
+   }
+
+// ----------------------------------------------------------------------
+// FUNZIONI
+// ----------------------------------------------------------------------
+   procedure GetInfoPiece( bool bIsPrimary)
+   {
+      num nRotPz ;
+      num nPiece ;
+      nPiece = ABS(GetIndexFromPieceName( $TcmdStr1)) ;
+      if ( nPiece < 1)
+         OUTLOG( TRUE, OUTSTR( "{$TcmdStr1} PIECE NOT FOUND!")) ;
+/*         g_nNumPiece = g_nNumPiece + 1 ;
+      else
+         g_nNumPiece = nPiece ;*/
+      
+		
+      if ( bIsPrimary) {
+        // Salvo dati pezzo
+         g_nDimGrX      = $TcmdPar7 ;
+         g_nDimGrY      = $TcmdPar8 ;
+         g_nDimGrZ      = $TcmdPar9 ;
+         g_nNumOrdPz    = $TcmdPar2 ;  
+         g_v3PosFin[nPiece].x = $TcmdPar4 ;
+         g_v3PosFin[nPiece].y = $TcmdPar5 ;
+         g_v3PosFin[nPiece].z = $TcmdPar6 ;
+      }
+      else {
+        // in prima fase, recupero nome pezzo e numero d'ordine
+         if ( g_nCurrPhase == 1) {
+           // salvo il nome del pezzo 
+            g_sPieceName[nPiece]   = $TcmdStr1 ;
+           // salvo il numero d'ordine del pezzo
+            g_nNumOrdPiece[nPiece] = g_nNumOrdPz ; 
+            g_v3PosGrePrec[nPiece].x = $TcmdPar6 ;
+            g_v3PosGrePrec[nPiece].y = $TcmdPar7 ;
+            g_v3PosGrePrec[nPiece].z = $TcmdPar8 ;
+            g_v3DimGrePrec[nPiece].x = g_nDimGrX ;
+            g_v3DimGrePrec[nPiece].y = g_nDimGrY ;
+            g_v3DimGrePrec[nPiece].z = g_nDimGrZ ;
+         }
+         else {
+            g_v3PosGrePrec[nPiece].x = g_v3PosGre[nPiece].x ;
+            g_v3PosGrePrec[nPiece].y = g_v3PosGre[nPiece].y ;
+            g_v3PosGrePrec[nPiece].z = g_v3PosGre[nPiece].z ;
+            g_v3DimGrePrec[nPiece].x = g_v3DimGre[nPiece].x ;
+            g_v3DimGrePrec[nPiece].y = g_v3DimGre[nPiece].y ;
+            g_v3DimGrePrec[nPiece].z = g_v3DimGre[nPiece].z ;
+         }
+         
+         g_nTableForPiece[nPiece] = g_nCurrTable ;
+        // aggiorno dimensioni grezzo e posizione pezzo 
+         g_v3PosGre[nPiece].x = $TcmdPar6 ;
+         g_v3PosGre[nPiece].y = $TcmdPar7 ;
+         g_v3PosGre[nPiece].z = $TcmdPar8 ;
+        // acquisisco le dimensioni del grezzo
+         g_v3DimGre[nPiece].x = g_nDimGrX ;
+         g_v3DimGre[nPiece].y = g_nDimGrY ;
+         g_v3DimGre[nPiece].z = g_nDimGrZ ; 
+        // acquisisco le dimensioni del finito
+         g_v3DimFin[nPiece].x = $TcmdPar2 ;
+         g_v3DimFin[nPiece].y = $TcmdPar3 ;
+         g_v3DimFin[nPiece].z = $TcmdPar4 ;
+         
+         UpdatePieceExtension( nPiece) ;
+      }
+   }
+// --------------------------------------------------------------------  
+   procedure UpdatePieceExtension( num nPiece)
+   {
+     // aggiorno i punti min/max
+      if ( IsSetVar( g_pMinPz)) {
+         g_pMinPz.x = max( g_pMinPz.x, g_v3PosFin[nPiece].x) ;
+         g_pMinPz.y = max( g_pMinPz.y, g_v3PosFin[nPiece].y) ;
+         g_pMinPz.z = max( g_pMinPz.z, ( g_v3PosFin[nPiece].z - g_v3DimFin[nPiece].z)) ;
+      }
+      else
+         g_pMinPz = VEC3( g_v3PosFin[nPiece].x, g_v3PosFin[nPiece].y, ( g_v3PosFin[nPiece].z - g_v3DimFin[nPiece].z)) ;
+         
+      if ( IsSetVar( g_pMaxPz)) {
+         g_pMaxPz.x = max( g_pMaxPz.x, ( g_v3PosFin[nPiece].x + g_v3DimFin[nPiece].x)) ;
+         g_pMaxPz.y = max( g_pMaxPz.y, ( g_v3PosFin[nPiece].y + g_v3DimFin[nPiece].y)) ;
+         g_pMaxPz.z = max( g_pMaxPz.z, g_v3PosFin[nPiece].z) ;
+      }
+      else
+         g_pMaxPz = VEC3( ( g_v3PosFin[nPiece].x + g_v3DimFin[nPiece].x), ( g_v3PosFin[nPiece].y + g_v3DimFin[nPiece].y), g_v3PosFin[nPiece].z) ;
+         
+      if ( IsSetVar( g_pMinGr)) {
+         g_pMinGr.x = min( g_pMinGr.x, g_v3PosGre[nPiece].x) ;
+         g_pMinGr.y = min( g_pMinGr.y, g_v3PosGre[nPiece].y) ;
+         g_pMinGr.z = min( g_pMinGr.z, (g_v3PosGre[nPiece].z - g_v3DimGre[nPiece].z)) ;
+      }
+      else
+         g_pMinGr = VEC3( g_v3PosGre[nPiece].x, g_v3PosGre[nPiece].y, ( g_v3PosGre[nPiece].z - g_v3DimGre[nPiece].z)) ;
+         
+      if ( IsSetVar( g_pMaxGr)) {
+         g_pMaxGr.x = max( g_pMaxGr.x, (g_v3PosGre[nPiece].x + g_v3DimGre[nPiece].x)) ;
+         g_pMaxGr.y = max( g_pMaxGr.y, (g_v3PosGre[nPiece].y + g_v3DimGre[nPiece].y)) ;
+         g_pMaxGr.z = max( g_pMaxGr.z, g_v3PosGre[nPiece].z) ;
+      }
+      else
+         g_pMaxGr = VEC3( ( g_v3PosGre[nPiece].x + g_v3DimGre[nPiece].x), ( g_v3PosGre[nPiece].y + g_v3DimGre[nPiece].y), g_v3PosGre[nPiece].z) ;
+   }
+
+// ----------------------------------------------------------------------
+   procedure GetInfoUnderPiece()
+   {
+      g_nDimUnderGrZ = $TcmdPar5 ;
+      g_nVacuumMaxHeight = $TcmdPar8 - $TcmdPar5 ;
+     // calcolo l'offset in zeta rispetto all'origine
+      g_nOfsZOrig = g_pMaxGr.z - (g_pMaxGr.z - g_pMinGr.z) - g_nVacuumMaxHeight ;  
+   }
+
+//---------------------------------------------------------------------------- 
+   function GetInfoHead( string szHeadName) : string
+   {
+      string szHeadInfo = "" ;
+      
+      GETHEADDATA ( szHeadName, 3, &szHeadInfo) ;
+      
+      return szHeadInfo ;
+   }
+
+//----------------------------------------------------------------------------
+   function IsAggregate( string szHeadName) : bool
+   {
+      string szHeadInfo ;
+      
+      // Recupero informazione se aggregato dalle info testa   
+      szHeadInfo = GetInfoHead( szHeadName) ;
+
+      return GETVALNUM( szHeadInfo, S_IS_AGGRE) == 1 ;
+   }
+   
+   
+//----------------------------------------------------------------------------
+   function IsBladeOnDru( string szHeadName) : bool
+   {
+      string szHeadInfo ;
+      
+      
+      if( GetCurrHeadType() == N_TYPE_HEAD_HORIZ) {
+         // Recupero informazione se aggregato dalle info testa   
+         szHeadInfo = GetInfoHead( szHeadName) ;
+
+         return GETVALNUM( szHeadInfo, S_IS_BLADE_ON_DRU) == 1 ;
+      }
+      else
+         return FALSE ;
+   }
+   
+//-------------------------------------------------------------------------
+   function GetGroupInUse() : num
+   {
+      num nCurrGroup ;
+      
+     // per gruppi > 9 
+      if( STRLEN( $HeadName) > 4 AND STRSTR( $HeadName, ".") <=0)
+         nCurrGroup = STRINGTONUM( STRMID( $HeadName, 2, 2)) ;
+      else
+         nCurrGroup = STRINGTONUM( STRMID( $HeadName, 2, 1)) ;
+      
+      return nCurrGroup ;
+   }
+   
+//---------------------------------------------------------------- 
+   procedure SaveTableData()
+   {
+      g_nTableUse      = $TcmdPar1 ; // tavola SX - Tavola Unica - Tavola pendolare
+      g_vTableSize.x   = $TcmdPar2 ;
+      g_vTableSize.y   = $TcmdPar3 ;
+      g_nTableType     = $TcmdPar4 ; // se con carrelli o piani manuali
+      g_v3TableOfsOrig = VEC3( $TcmdPar7, $TcmdPar8, $TcmdPar9) ; // Origine tavola rispetto ZM
+   }
+   
+//---------------------------------------------------------------   
+   function GetIndexFromNameVis( string sName) : num
+   {
+      num nPos ;
+      num nIndex ;
+      num nResult ;
+      
+      nPos = STRSTR( sName, "_") ;
+      if( nPos > 0) {
+         nIndex = STRINGTONUM( STRMID( sName, nPos + 1, STRLEN( sName))) ;
+         nResult = nIndex ;
+      }
+      else
+         nResult = -1 ;
+         
+      return nResult ;    
+   }   
+   
+//----------------------------------------------------------------  
+   procedure GetCurrToolInfo()
+   {
+      g_anCurrToolSpeed[1]  = $TcmdPar1 ; // Speed
+      g_anCurrToolSpeed[2]  = $TcmdPar2 ; // Speed Max
+      g_nCurrToolSpeedSense = OPT( g_anCurrToolSpeed[1] > 0, SPEED_ROT_CW, SPEED_ROT_CCW) ; // Speed sense
+      g_anCurrToolFeed[1]   = $TcmdPar3 ; // Entry feed
+      g_anCurrToolFeed[2]   = $TcmdPar4 ; // Work feed
+      g_anCurrToolFeed[3]   = $TcmdPar5 ; // Exit feed
+   }   
+   
+//--------------------------------------------------------------------------------
+   function CanMakeArc() : BOOL
+   {
+      bool bAttached = TRUE ;
+      num  nDX  = 0 ;
+      num  nDY  = 0 ;
+      num  nAng = 0 ;
+      num  nLen = 0 ;
+      
+     // se non è stato settato il flag o non è valido, non genero nulla
+      if ( NOT( ISSETVAR( $Flag)))
+         bAttached = FALSE ;
+      if ( $Flag < 1)
+         bAttached = FALSE ;
+      if ( $MachType != 206)
+         bAttached = FALSE ;
+      
+     // se non sono settate le posizioni precedenti, il movimento non è da emettere
+      if ( NOT( ISSETVAR( $PreX)))
+         return TRUE ;
+      if ( NOT( ISSETVAR( $PreY)))
+         return TRUE ;
+      if  ( NOT ( bAttached)) {
+         if ( NOT( ISSETVAR( $PreZ)))
+            return TRUE ;
+      }
+
+     // se non sono settate le posizioni o il raggio, il movimento non è da emettere
+      if ( NOT( ISSETVAR( $X)))
+         return TRUE ;
+      if ( NOT( ISSETVAR( $Y)))
+         return TRUE ;
+      if  ( NOT ( bAttached)) {
+         if ( NOT( ISSETVAR( $Z))) 
+            return TRUE ;
+      }
+      if ( NOT( ISSETVAR( $R))) 
+         return FALSE ;
+
+     // calcolo la corda
+      nDX = $X - $PreX ;
+      nDY = $Y - $PreY ;
+      
+     // a seconda del piano, va calcolata la corda con 2 diverse componenti 
+      if ( ( $PlaneType == 3  OR  $PlaneType == 4)  AND  NOT( $IsGlobalRef)) {    //YZ  o  ZY
+         nDX = $Z - $PreZ ;
+         nDY = $Y - $PreY ;
+      }
+      elsif ( ( $PlaneType == 5  OR  $PlaneType == 6)  AND  NOT( $IsGlobalRef)) {    //XZ  o  ZX
+         nDX = $X - $PreX ;
+         nDY = $Z - $PreZ ;
+      }
+      else {    //XY  o  YX  o  altri generici
+         nDX = $X - $PreX ;
+         nDY = $Y - $PreY ;
+      }
+
+     // calcolo la lunghezza
+      nAng = 2 * asin( sqrt( nDX * nDX + nDY * nDY) / ( $R * 2)) ;
+      nLen = $R * 3.14159 * nAng / 180 ;
+
+     // se lunghezza maggiore del minimo
+      return ( nLen >= p_nMinLenArc) ;
+   }
+
+//--------------------------------------------------------------------------------
+   procedure CalculateInGlob()
+   {
+      vec3 ptLoc ;
+
+     // assegno vec3
+      ptLoc = VEC3( $X, $Y, $Z) ;
+
+     // trasformo in locale
+      g_pGlob = TRANSFVEC3WITHTPLANE( ptLoc, "PF") ;
+   }   
+  
+//--------------------------------------------------------------------------------   
+   procedure CalculateInGlobLastPoint()
+   {
+      vec3 ptLoc ;
+
+     // assegno vec3
+      ptLoc = VEC3( g_nLastX, g_nLastY, g_nLastZ) ;
+
+     // trasformo in locale
+      g_pGlob = TRANSFVEC3WITHTPLANE( ptLoc, "PF") ;
+   } 
+  
+//--------------------------------------------------------------------------------   
+   procedure StoreLastAxisVal() 
+   {
+      if ( ISSETVAR( $X))
+         g_nLastX = $X ;
+
+      if ( ISSETVAR( $Y))
+         g_nLastY = $Y ;
+
+      if ( ISSETVAR( $A))
+         g_nLastA = $A ;
+      
+      if ( ISSETVAR( $B))
+         g_nLastB = $B ;
+         
+      if ( ISSETVAR( $C))
+         g_nLastC = $C ;   
+
+      if ( ISSETVAR( $Z))
+         g_nLastZ = $Z ;
+      if ( ISSETVAR( $Vx))
+         g_v3LastVFre.x = $Vx ;
+         
+      if ( ISSETVAR( $Vy))
+         g_v3LastVFre.y = $Vy ;
+         
+      if ( ISSETVAR( $Vz))
+         g_v3LastVFre.z = $Vz ;
+   }   
+   
+      
+//--------------------------------------------------------------------------------
+   procedure CalculateTip()
+   {
+      if ( ISSETVAR( $X)) then
+         g_vTip.x = $X + $Vx * $ToolLen ;
+      else
+         RESETVAR( "TipX") ; 
+      if ( ISSETVAR( $Y)) then
+         g_vTip.y = $Y + $Vy * $ToolLen ; 
+      else
+         RESETVAR( "TipY") ; 
+      if ( ISSETVAR( $Z)) then
+         g_vTip.z = $Z + $Vz * $ToolLen ; 
+      else
+         RESETVAR( "TipZ") ; 
+   }  
+   
+   //--------------------------------------------------------------------------------
+   procedure TcpToNoTcp( BOOL bOnGenPlane)
+   {
+      vec3 vTcp ;
+      vec3 vTool ;
+
+     // memorizzo 
+      g_vStoredPos.x = $X ;
+      g_vStoredPos.y = $Y ;
+      g_vStoredPos.z = $Z ;
+      
+     // recupero TCP
+      vTcp = GetDeltaTcp() ;
+      if ( bOnGenPlane) {
+         // Trasformo in globale il movimento corrente
+         CalculateInGlob() ;
+         $X = g_pGlob.x + vTcp.x ;
+         $Y = g_pGlob.y + vTcp.y ;
+         $Z = g_pGlob.z + vTcp.z ;
+         // Trasformo la direzione frea in globale per recupero lunghezza utensile
+         vTool = VEC3( $Vx, $Vy, $Vz) ;
+         vTool = TRANSFVEC3WITHTPLANE( vTool, "VF") ;
+         $X   = $X + vTool.x * $ToolLen ;
+         $Y   = $Y + vTool.y * $ToolLen ;
+         $Z   = $Z + vTool.z * $ToolLen ;
+      }
+      else {
+         $X   = $X + vTcp.x ;
+         $Y   = $Y + vTcp.y ;
+         $Z   = $Z + vTcp.z ;
+         
+        // recupero lunghezza nominale utensile
+         $X   = $X + $Vx * $ToolLen ;
+         $Y   = $Y + $Vy * $ToolLen ;
+         $Z   = $Z + $Vz * $ToolLen ;
+      }
+      
+   }
+  
+//----------------------------------------------------------------------------
+   procedure LocToGlob()
+   {
+     // memorizzo 
+      g_vStoredPos.x = $X ;
+      g_vStoredPos.y = $Y ;
+      g_vStoredPos.z = $Z ;
+      // Trasformo in globale il movimento corrente
+      CalculateInGlob() ;
+      $X = g_pGlob.x ;
+      $Y = g_pGlob.y ;
+      $Z = g_pGlob.z ;
+   }  
+  
+  //--------------------------------------------------------------------------------
+   procedure RestoreValues()
+   {
+     // ripristino
+      $X = g_vStoredPos.x ;
+      $Y = g_vStoredPos.y ;
+      $Z = g_vStoredPos.z ;
+   }
+ 
+//---------------------------------------------   
+   Procedure ManageOriginFromDisposition()
+   {
+      g_bReadInfoOrig = TRUE ;
+       
+      if ( $TcmdStr1 != "") {
+         // g_nCurrOrig_TabSx = STRINGTONUM( STRSUB( $TcmdStr1, "O", "")) ;
+         g_nCurrOrig_TabSx = $TcmdPar3 ;
+         g_sOrigName[g_nCurrOrig_TabSx]   = $TcmdStr1 ; 
+         g_v3OrigPos[g_nCurrOrig_TabSx].x = $TcmdPar4 ;
+         g_v3OrigPos[g_nCurrOrig_TabSx].y = $TcmdPar5 ;
+         g_v3OrigPos[g_nCurrOrig_TabSx].z = $TcmdPar6 ;
+      }
+      if ( $TcmdStr2 != "") {
+         // g_nCurrOrig_TabDx = STRINGTONUM( STRSUB( $TcmdStr2, "O", "")) ;
+         g_nCurrOrig_TabDx = $TcmdPar9 ; 
+         g_sOrigName[g_nCurrOrig_TabDx]   = $TcmdStr2 ; 
+         g_v3OrigPos[g_nCurrOrig_TabDx].x = $TcmdParA ;
+         g_v3OrigPos[g_nCurrOrig_TabDx].y = $TcmdParB ;
+         g_v3OrigPos[g_nCurrOrig_TabDx].z = $TcmdParC ;
+      }
+   }
+   
+  
+  //--------------------------------------------------------------------------------
+   function GetCurrPieceId() : num
+   {
+      bool   bFind = FALSE ;
+      num    nPos ;
+      num    nI ;
+      num    nReturn ;
+      string sCurr ;
+      
+      
+      nPos = STRSTR( $MachName, ",") ;
+      sCurr = STRMID( $MachName, 1, nPos - 1) ;
+      nI = 1 ;
+      while( nI <= g_nContPiece AND NOT bFind) {
+         if( sCurr == g_sPieceName[nI])
+            bFind = TRUE ;
+         else   
+            nI = nI + 1 ;
+      }
+      
+      nReturn = OPT( bFind, nI, -1) ;
+      
+      return nReturn ;
+   }
+   
+// -------------------------------------------------------------------- 
+   procedure SaveToolOnSetup()
+   {
+      string   sCorre ;
+
+     // Salvo la lista utensili solo se non è un foratore
+      if( $TcmdPar4 != 61) {
+         g_nNumToolSetUp = g_nNumToolSetUp + 1 ;
+         // salvo posizione e nome utensili attrezzati
+         g_sToolPosSetUp[ g_nNumToolSetUp] = $TcmdStr1 ;
+         g_sToolNameSetUp[ g_nNumToolSetUp] = $TcmdStr2 ;
+         // salvo numero correttore, lunghezza e diametro utensile
+         sCorre = $TcmdStr1 ;
+         sCorre = STRSUB( sCorre, "T", "") ;
+         g_sToolsCorre[ g_nNumToolSetUp] = OUTSTR( "{$TcmdPar5}") ;
+         g_nToolsLen[ g_nNumToolSetUp]   = $TcmdPar6 ;
+         g_nToolsDiam[ g_nNumToolSetUp]  = $TcmdPar7 ;
+      }
+   }
+   
+// --------------------------------------------------------------------       
+   procedure SaveMachList()
+   {
+      num nGrp ;
+
+      // 1. Nome completo lavorazione (pezzo,kit)
+      // 2. Nome utensile
+      // 3. Gruppo di appartenenza (come centinaia)
+      // 4. Fase
+      // 9. Speed 
+      // 10. Rotazione angolo utensile (DA KIT)
+      
+     // dato il comando, calcolo il gruppo di appartenenza 
+      nGrp = $TcmdPar3 / 100 ;
+       
+      // se non è una lavorazione di foratura multipla la aggiungo alla lista 
+      g_nMachCont = g_nMachCont + 1 ; 
+
+      g_sMachList[ g_nMachCont]      = $TcmdStr1 ;
+      g_sMachToolList[ g_nMachCont]  = $TcmdStr2 ;
+      g_nMachToolSpeed[ g_nMachCont] = $TcmdPar9 ;
+      g_nMachToolGrp[ g_nMachCont]   = nGrp ;
+   }
+   
+// -------------------------------------------------------------------- 
+   function GetCurrHeadType() : NUM
+   {
+      num nPos ;
+      string sHead ;
+      string sType ;
+      
+      
+      sHead = STRGSUB( $HeadName, "H", "") ;
+      nPos = STRSTR( sHead, ".") ;
+      // se ho il "." nel nome, lo tolgo
+      if( nPos > 0)
+         sHead = STRMID( sHead, 1, nPos - 1) ;
+     // se il gruppo è > 9 
+      if( STRLEN( sHead) > 3)
+         sType = STRMID( sHead, 3, 2) ;
+      else
+         sType = STRMID( sHead, 2, 2) ;
+      
+      return STRINGTONUM( sType) ;
+   }
+   
+   //----------------------------------------------------------------------------------------------------------------------
+   procedure CalcHeadType()
+   {
+      num    nDru ;
+      string sVal ;
+
+
+     // salvo i valore precedenti   
+      g_nPrevHeadMont = g_nHeadMont ;
+
+     // recupero eventuale appartenenza a gruppo a forare
+      nDru = GETVALNUM( $HeadInfo, "DRU=") ;
+
+      g_nHeadMont = GetCurrHeadType() ;
+
+      // Se nelle info della testa ho dichiarazione esplicita del tipo
+      if ( STRSTR( $HeadInfo, S_HEAD_TYPE) > 0)
+         g_nHeadType = GetValNum( $HeadInfo, S_HEAD_TYPE) ; 
+      // Altrimenti testa standard 
+      else {
+        // rinvio su gruppo a forare (lametta o similare)
+         if ( nDru > 0) 
+            g_nHeadType = H_BLADEONDRU_HEAD ;
+        // testa 3 o 4assi normale
+         elsif ( g_nHeadMont == 11)  {
+           // se ci sono assi rotanti sulla testa
+            if ( ISSETVAR( $NameA))          
+               g_nHeadType = H_4AXIS_HEAD ;
+           // se tastatore
+            elsif ( $ToolType == 1071) 
+               g_nHeadType = H_TASTAT_HEAD ;
+           // altrimenti
+            else
+               g_nHeadType = H_3AXIS_HEAD ;
+         }
+        // testa 5assi
+         elsif ( g_nHeadMont == 51) 
+            g_nHeadType = H_5AXIS_HEAD ;
+        // testa orizzontale rotante
+         elsif ( g_nHeadMont == 37) 
+            g_nHeadType = H_HORIZ_HEAD ;
+        // aggregato
+         elsif ( (g_nHeadMont >= 31  AND  g_nHeadMont <= 36)  OR  g_nHeadMont == 38) 
+            g_nHeadType = H_AGGRE_HEAD ;
+        // aggregato su 5ax
+         elsif ( g_nHeadMont >= 55 AND g_nHeadMont <= 59) 
+            g_nHeadType = H_AGGRE_5A_HEADX ;
+        // rinvio rotante   
+         elsif ( g_nHeadMont == 41) 
+            g_nHeadType = H_ROTANTE_HEAD ;
+        // rinvio da sotto    
+         elsif ( g_nHeadMont == 72) 
+            g_nHeadType = H_DASOTTO_HEAD ;
+        // gruppo a forare
+         elsif ( g_nHeadMont == 61) 
+            g_nHeadType = H_DRU_HEAD ;
+        // gruppo a forare rotante
+         elsif ( g_nHeadMont == 64  OR  g_nHeadMont == 65) 
+            g_nHeadType = H_RDRU_HEAD ;
+        // testa non definita : Errore
+         else {
+            g_nHeadType = H_NONE ;
+            OUTLOG( TRUE, OUTSTR( "Errore : testa di tipo sconosciuto->{g_nHeadMont}")) ;
+         }
+      }
+   }
+   
+//--------------------------------------------------------------------------------
+   function GetSecurityZPosAbovePiece( num nToolsMaxLen[], num nToolsMaxDiam[]) : NUM
+   {
+      bool bOk ;
+      num  nI ;
+      num  nAngle ;
+      num  nMaxDistance ;
+      num  nDistance ;
+      vec3 vHeadPos ;
+      vec3 vHeadDir ;
+      
+          
+     // init
+      nMaxDistance = 0 ;
+      
+     // ciclo su tutte le teste (massimo 4 teste)
+      nI = 1 ;
+      while ( nI <= 4) {
+      
+        // recupero offset e direzione testa
+         bOk = GetHeadData( GetHeadName( nI), 4, &vHeadPos) ;
+         bOk = bOk  AND  GetHeadData( GetHeadName( nI), 5, &vHeadDir) ;
+         
+        // se testa non valida non faccio nulla
+         if ( bOk) then {
+
+           // se testa non verticale, la ruoto in posizione verticale
+            nAngle = ATAN2( vHeadDir.z, vHeadDir.y) ;
+            if ( nAngle < 0) then
+               nAngle = nAngle + 360 ;
+            nAngle = ABS( nAngle - 90) ;
+            if ( nAngle != 0) then
+               RotateVector( VEC3( 1, 0, 0), nAngle, &vHeadPos) ;
+               
+           // se non ho informazioni sull'utensile montato sulla testa, considero una lunghezza massima teorica
+            if ( nToolsMaxLen[ nI] == 0  AND  nToolsMaxDiam[ nI] == 0) then
+               nToolsMaxLen[ nI] = p_nToolLenForSecurityMovements ;
+            
+           // trovo distanza tra utensile e filo superiore del pezzo
+            nDistance = SQRT( POW( ABS( vHeadPos.x) + nToolsMaxDiam[ nI] * 0.5, 2) + POW( ABS( vHeadPos.z) + nToolsMaxLen[ nI], 2)) ;
+            
+           // trovo massima distanza di tutte le teste
+            nMaxDistance = MAX( nMaxDistance, nDistance) ;
+         }
+      
+        // testa successiva
+         nI = nI + 1 ;
+      }
+      
+     // aggiungo sicurezza
+      nMaxDistance = nMaxDistance + p_nZAddForSecurityMovements ;
+      
+      return nMaxDistance ;
+   }   
+   
+// --------------------------------------------------------------------    
+ {
+ }
+
+

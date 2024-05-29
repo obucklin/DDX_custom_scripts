@@ -1,0 +1,31 @@
+// File gestioni speciali
+//
+// CustomerSpecialManagement
+//
+// ----------------    FUNZIONI E PROCEDURE  ---------------------
+function CustomerSpecialFunction( num nSection) : BOOL
+{
+   bool bExeStdFeatCond = TRUE ;
+   string sToolName ;
+   string sFace[10] ;
+   vec3   v3AppoNormFace ;
+
+
+//   if ( nSection == _ON_FEAT) then {
+//      if ( $CL >= 421 AND $CL <= 427) then {
+//         bExeStdFeatCond = FALSE ;
+//      }
+//   }
+//   elsif ( nSection == _BEFORE_INSKIT) then {
+//   }
+//   elsif ( nSection == _AFTER_INSKIT) then {
+//   }
+//   elsif ( nSection == _ON_DISP) then {
+//   }
+   return bExeStdFeatCond ;
+}
+
+// Main
+{
+
+}

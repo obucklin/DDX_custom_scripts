@@ -1,0 +1,131 @@
+// **********************************************************************
+// language file for the machine                                        *
+// **********************************************************************
+// Client: HOLZHER                                                      *
+// **********************************************************************
+// modifications:                                                       *
+// 12/04/2013 v4.9C3 LF MP Prima versione                               *
+// 11/03/2015 v6.1C1 SB translate TED part                              *
+// **********************************************************************
+
+   string g_sErrRescuePieceId           = "" ;
+   string g_sErrOpenFile                = "" ;
+   string g_sErrFirstMachDCM            = "" ;
+   string g_sErrSimNotAvailable         = "" ;
+   string g_sErrFeedMM                  = "" ;
+   string g_sErrSelMultiDrill           = "" ;
+   string g_sErrNoVisUnderPiece         = "" ;
+   string g_sErrToolSelWrong            = "" ;
+   string g_sErrFeedNotSetted           = "" ;
+   string g_sErrTypeOfLeadNotManaged    = "" ;
+   string g_sWarnVersCampus             = "" ;
+   string g_sWarnNoPathForAggre         = "" ;
+   string g_sErrRescueRefHead           = "" ;
+   string g_sErrRescueInfoHead          = "" ;
+   string g_sErrRescueListHeads         = "" ;
+   string g_sErrToolCompensationInIso   = "" ;
+   string g_sWarnContWithStepNotAllowed = "" ;
+   STRING l_szIsoDirNotExists           = "" ;
+
+{
+   if ( STRUPR( p_sLanguage) == "ITA") then {
+      g_sErrRescuePieceId         = "Errore nel recupero dell'indice del pezzo" ;
+      g_sErrOpenFile              = "Errore nell'apertura del file d'uscita: " ;
+      g_sErrFirstMachDCM          = "Errore non si pu� usare come prima lavorazione un comando diretto" ;
+      g_sErrSimNotAvailable       = "^nSimulazione NON DISPONIBILE^n" ;
+      g_sErrFeedMM                = "Esprimere la FEED in MM" ;
+      g_sErrNoVisUnderPiece       = "^nERRORE: Nessun sottopezzo sotto il pezzo da produrre^n" ;
+      g_sErrSelMultiDrill         = "^nErrore nella selezione del gruppo a forare (nome errato)^n" ;
+      g_sErrToolSelWrong          = "^nERRORE nella selezione dell'utensile" ;
+      g_sErrFeedNotSetted         = "^nERRORE: Feed non settata" ;
+      g_sErrTypeOfLeadNotManaged  = "^nERRORE: Tipo di attacco non gestito in NCHOPS" ;
+      g_sWarnVersCampus           = "^n--> WARNING! <--^nCampus Version >= 6.4.4.2^nExtsetup.zip >= 6.86^n" ;
+      g_sWarnNoPathForAggre       = "^nERRORE: Nessuna path impostata per il modello 3d dell'aggregato. Contattare assistenza!^n" ;
+      g_sErrRescueRefHead         = "^nERRORE: Impossibile individuare la testa di riferimento^n" ;
+      g_sErrRescueInfoHead        = "^nERRORE: Impossibile individuare le info della testa^n" ;
+      g_sErrRescueListHeads       = "^nERRORE: Impossibile individuare la lista delle teste del gruppo^n" ;
+      g_sErrToolCompensationInIso = "^nERRORE: Su macro ISO impossibile utilizzare la compensazione raggio utensile impostare compensazione mista^n" ;
+      g_sWarnContWithStepNotAllowed = "^nATTENZIONE: Contornatura con STEP non ammessa: forzata MACRO ISO^n" ;
+      l_szIsoDirNotExists         = "ERRORE: Il percorso per i file ISO non esiste" ;
+   }
+   elsif ( STRUPR( p_sLanguage) == "ENG") then {
+      g_sErrRescuePieceId         = "Error recovering the piece ID" ;
+      g_sErrOpenFile              = "Error opening file: " ;
+      g_sErrFirstMachDCM          = "Error is not possible to insert a direct command like first machining" ;
+      g_sErrSimNotAvailable       = "^nSimulation NOT AVAILABLE^n" ;
+      g_sErrFeedMM                = "Esprimere la FEED in MM" ;
+      g_sErrNoVisUnderPiece       = "^nERRORE: Nessun sottopezzo sotto il pezzo da produrre^n" ;
+      g_sErrSelMultiDrill         = "^nError selecting multiple drilling (wrong name)^n" ;
+      g_sErrToolSelWrong          = "^nERROR in tool selection" ;
+      g_sErrFeedNotSetted         = "^nERROR: Feed not setted" ;
+      g_sErrTypeOfLeadNotManaged  = "^nERROR: Type of LeadIn/Out not managed in NCHOPS" ;
+      g_sWarnVersCampus           = "^n--> WARNING! <--^nCampus Version >= 6.4.4.2^nExtsetup.zip >= 6.86^n" ;
+      g_sWarnNoPathForAggre       = "^nERROR: No path setted for the 3d model of the aggregate. Plase contact assistance!^n" ;
+      g_sErrRescueRefHead         = "^nERROR: Impossible to get the reference head^n" ;
+      g_sErrRescueInfoHead        = "^nERROR: Impossible to get the info of the head^n" ;
+      g_sErrRescueListHeads       = "^nERROR: Impossible to get the list of the heads of the group^n" ;
+      g_sErrToolCompensationInIso = "^nERROR: On macro ISO cannot be use radius compensation; please set Mixed compensation^n" ;
+      g_sWarnContWithStepNotAllowed = "^nWARNING: Contouring with STEP not allowed: Forced MACRO ISO^n" ;
+      l_szIsoDirNotExists         = "ERROR: Directory for ISO files doesn't exist" ;
+   }
+   elsif ( STRUPR( p_sLanguage) == "FRA") then {
+      g_sErrRescuePieceId         = "Error recovering the piece ID" ;
+      g_sErrOpenFile              = "Errore nell'apertura del file d'uscita: " ;
+      g_sErrFirstMachDCM          = "Errore non si pu� usare come prima lavorazione un comando diretto" ;
+      g_sErrFeedMM                = "Esprimere la FEED in MM" ;
+      g_sErrNoVisUnderPiece       = "^nERRORE: Nessun sottopezzo sotto il pezzo da produrre^n" ;
+      g_sErrSelMultiDrill         = "^nErrore nella selezione del gruppo a forare (nome errato)^n" ;
+      g_sErrToolSelWrong          = "^nERROR in tool selection" ;
+      g_sErrFeedNotSetted         = "^nERRORE: Feed not setted" ;
+      g_sErrTypeOfLeadNotManaged  = "^nERROR: Type of LeadIn/Out not managed in NCHOPS" ;
+      g_sErrSimNotAvailable       = "^nSimulation NOT AVAILABLE^n" ;
+      g_sWarnVersCampus           = "^n--> WARNING! <--^nCampus Version >= 6.4.4.2^nExtsetup.zip >= 6.86^n" ;
+      g_sWarnNoPathForAggre       = "^nERROR: No path setted for the 3d model of the aggregate. Plase contact assistance!^n" ;
+      g_sErrRescueRefHead         = "^nERROR: Impossible to get the reference head^n" ;
+      g_sErrRescueInfoHead        = "^nERROR: Impossible to get the info of the head^n" ;
+      g_sErrRescueListHeads       = "^nERROR: Impossible to get the list of the heads of the group^n" ;
+      g_sErrToolCompensationInIso = "^nERROR: On macro ISO cannot be use radius compensation; please set Mixed compensation^n" ;
+      g_sWarnContWithStepNotAllowed = "^nWARNING: Contouring with STEP not allowed: Forced MACRO ISO^n" ;
+      l_szIsoDirNotExists         = "ERROR: Directory for ISO files doesn't exist" ;
+   }
+   elsif ( STRUPR( p_sLanguage) == "TED") then {
+      g_sErrRescuePieceId         = "Fehler beim Erstellen der Werkst�ck ID" ;
+      g_sErrOpenFile              = "Fehler beim �ffnen der Datei: " ;
+      g_sErrFirstMachDCM          = "FEHLER: Es darf kein Direkt-Befehl als erste Bearbeitung verwendet werden" ;
+      g_sErrFeedMM                = "Vorschub in MM angeben" ;
+      g_sErrNoVisUnderPiece       = "^nFEHLER: Es wurde keine Werkst�ckunterlage eingef�gt^n" ;
+      g_sErrSelMultiDrill         = "^nFehler bei der Auswahl der Bohrgruppe (falscher Name)^n" ;
+      g_sErrToolSelWrong          = "^nFehler bei der Werkzeugauswahl" ;
+      g_sErrFeedNotSetted         = "^nFEHLER: Vorschub nicht eingetragen" ;
+      g_sErrTypeOfLeadNotManaged  = "Anfahrweg wird von NcHops nicht unterst�tzt!" ;
+      g_sErrSimNotAvailable       = "^nSimulation NICHT VERFUEGBAR^n" ;
+      g_sWarnVersCampus           = "^n--> WARNUNG! <--^nCampus Version >= 6.4.4.2^nExtsetup.zip >= 6.86^n" ;
+      g_sWarnNoPathForAggre       = "^nERROR: No path setted for the 3d model of the aggregate. Plase contact assistance!^n" ;
+      g_sErrRescueRefHead         = "^nERROR: Impossible to get the reference head^n" ;
+      g_sErrRescueInfoHead        = "^nERROR: Impossible to get the info of the head^n" ;
+      g_sErrRescueListHeads       = "^nERROR: Impossible to get the list of the heads of the group^n" ;
+      g_sErrToolCompensationInIso = "^nERROR: On macro ISO cannot be use radius compensation; please set Mixed compensation^n" ;
+      g_sWarnContWithStepNotAllowed = "^nWARNING: Contouring with STEP not allowed: Forced MACRO ISO^n" ;
+      l_szIsoDirNotExists         = "ERROR: Directory for ISO files doesn't exist" ;
+   }
+   elsif ( STRUPR( p_sLanguage) == "SPA") then {
+      g_sErrRescuePieceId         = "Error recovering the piece ID" ;
+      g_sErrOpenFile              = "Errore nell'apertura del file d'uscita: " ;
+      g_sErrFirstMachDCM          = "Errore non si pu� usare come prima lavorazione un comando diretto" ;
+      g_sErrFeedMM                = "Esprimere la FEED in MM" ;
+      g_sErrNoVisUnderPiece       = "^nERRORE: Nessun sottopezzo sotto il pezzo da produrre^n" ;
+      g_sErrSelMultiDrill         = "^nErrore nella selezione del gruppo a forare (nome errato)^n" ;
+      g_sErrToolSelWrong          = "^nERROR in tool selection" ;
+      g_sErrFeedNotSetted         = "^nERRORE: Feed not setted" ;
+      g_sErrTypeOfLeadNotManaged  = "^nERROR: Type of LeadIn/Out not managed in NCHOPS" ;
+      g_sErrSimNotAvailable       = "^nSimulation NOT AVAILABLE^n" ;
+      g_sWarnVersCampus           = "^n--> WARNING! <--^nCampus Version >= 6.4.4.2^nExtsetup.zip >= 6.86^n" ;
+      g_sWarnNoPathForAggre       = "^nERROR: No path setted for the 3d model of the aggregate. Plase contact assistance!^n" ;
+      g_sErrRescueRefHead         = "^nERROR: Impossible to get the reference head^n" ;
+      g_sErrRescueInfoHead        = "^nERROR: Impossible to get the info of the head^n" ;
+      g_sErrRescueListHeads       = "^nERROR: Impossible to get the list of the heads of the group^n" ;
+      g_sErrToolCompensationInIso = "^nERROR: On macro ISO cannot be use radius compensation; please set Mixed compensation^n" ;
+      g_sWarnContWithStepNotAllowed = "^nWARNING: Contouring with STEP not allowed: Forced MACRO ISO^n" ;
+      l_szIsoDirNotExists         = "ERROR: Directory for ISO files doesn't exist" ;
+   }
+}

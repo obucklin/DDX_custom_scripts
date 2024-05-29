@@ -1,0 +1,43 @@
+//  Componente disposizione SCL
+//
+//  10.03.13  Autore : MP
+//
+NUM CONST N_DIM_TABLE_Y = 1300 ;
+
+// ===================================================================
+procedure AutoDisp()
+{
+   num nTotPiece ;
+   num nCurr ;
+   num nDimY ;
+   num nDimX ;
+   vec3 v3PiecePos ;
+   vec3 v3OffPiece ;
+   string sPart ;
+   num naOffPiece[2] ;
+   string sConfiguration ;
+
+
+   sConfiguration = ReadStringParam( "GENERAL", "LastConfLoad", ExplodeFilePath("%MACHPATH%\Plugins\FileImporter\Config\FileImporter.ini")) ;
+   Run( ExplodeFilePath( "%MACHPATH%\Plugins\FileImporter\Config\" + sConfiguration + ".scl")) ;
+   v3PiecePos = VEC3( 0, 0, 0) ;
+
+   nTotPiece = GetPiecesCount() ;
+   nCurr = 1 ;
+
+   naOffPiece[1] = N_X_OFFS_PIECE_ON_DISP ;
+   naOffPiece[2] = N_Y_OFFS_PIECE_ON_DISP ;
+
+   while( nCurr <= nTotPiece){
+      sPart = GetPieceName( nCurr) ;
+      v3OffPiece.x = naOffPiece[1] ;
+      v3OffPiece.y = naOffPiece[2] ;
+
+      v3PiecePos.x = v3OffPiece.x ;
+      v3PiecePos.y = v3OffPiece.y ;
+      
+      if ( NOT SetPiecePosition( nCurr, v3PiecePos))
+         OutputBox( "Disp error") ;
+      nCurr = nCurr + 1 ;
+   }
+}
