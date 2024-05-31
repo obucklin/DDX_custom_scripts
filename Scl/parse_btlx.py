@@ -15,7 +15,7 @@ import bcfcore
 from ewd import error
 
 bcfcore.do_debug()
-import_btl(r"C:\Users\obucklin\Desktop\TestOutput\FLIP_TEST1.btlx")
+import_btl(r"C:\Users\obucklin\Desktop\TestOutput\Module_44_test.btlx")
 
 
 def remove_double_cut(piece):

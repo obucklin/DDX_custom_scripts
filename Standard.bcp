@@ -48,7 +48,7 @@
    C_nMaxLenLongHole = 360 ;
    C_nDistHoleAxis = 325 ;
    C_nIngToWork = 1800 ;
-   C_nRotationStyle = _LsAnySide ;
+   C_nRotationStyle = _LsCurrSide ;
    C_bWorkRecessAsProfil = TRUE ;
    C_bWorkHoleToTop = FALSE ;
    C_bCutLongWithBlade = FALSE ;

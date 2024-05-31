@@ -19,19 +19,32 @@ bcfcore.do_debug()
 import_btl(r"C:\Users\obucklin\Desktop\TestOutput\Module_44_test.btlx")
 
 
-def parse_double_cut(piece):
-    # /length = exec_string("GetNotes",  piece, 'LUN')
-    face = None
+def parse_double_cut(piece, up = True):
+    dc = get_double_cut(piece)
+    flip_double_cut(piece, dc)
+    rotate_double_cut(piece, dc, up)
+    delete_feature(dc)
+      
+            
+def get_double_cut(piece):
     for feature in get_features_list(piece):
         type = get_feature_property(feature, 'TYP')
         if type == "DoubleCut":
-            x_pos = (exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'Orientation'))
-            face = (exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'FAC'))
-            if x_pos == "start":
-                flip_beam()
-            # delete_feature(feature)
-    return face        
-            
+            return feature
+    return None
+
+def flip_double_cut(piece, feature):
+    x_pos = (exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'Orientation'))
+    if x_pos == "start":
+        flip_beam()
+
+def rotate_double_cut(piece, feature, up = True):
+    face = (exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'FAC'))
+    for i in range(4):
+        if (face == 'B' and not up) or (face == 'T' and up):
+            break
+        rotate_beam()
+
 def finished_leftovers(piece, leftover_features):
     for feature in leftover_features:
         if exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'NOTW') == '1':
@@ -102,19 +115,13 @@ for piece in get_pieces_list(only_curr_group = False):
     set_current_beam(piece, update_ui=True)
     # debug(r"C:\ProgramData\Ddx\EasyWood\Machines\Epicon7235_ETH_Zürich\Scl\test.py", "Processing piece: " + piece)
 
-
-
-
     start_face = parse_double_cut(piece)
 
     if start_face and start_face != "1":
         steps = int(start_face) - 1
         rotate_beam(fix_start_modality = 2)
 
-
-
     # generate_predrill(piece)
-
 
     if exec_bool("BeamMach", False, False):
         pass
