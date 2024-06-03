@@ -94,6 +94,7 @@
    C_nPriFor = 3000 ;
    C_nPriBla = 1000 ;
    C_nPriFre = 5000 ;
+   C_nPriEng = 4000 ;
    C_nDeltaSquad = 3000 ;
    C_nPriBlaDir = 0 ;
    C_sSuffInvert = "S" ;

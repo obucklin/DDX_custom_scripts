@@ -1,7 +1,3 @@
-from ast import Break
-from audioop import add
-import re
-from requests import delete, get
 import ewd
 from ewd import beam
 from ewd.beam import *
@@ -12,38 +8,45 @@ from sclcore import execute_command_bool as exec_bool
 from sclcore import execute_command_num as exec_num
 from sclcore import execute_command_string as exec_string
 from sclcore import Ref
-import bcfcore
+from bcfcore import do_debug
 from ewd import error
 
-bcfcore.do_debug()
-import_btl(r"C:\Users\obucklin\Desktop\TestOutput\Module_44_test.btlx")
+do_debug()
+import_btl(r"C:\Users\obucklin\Desktop\TestOutput\Module_44_test.btlx", "36")
 
 
 def parse_double_cut(piece, up = True):
-    dc = get_double_cut(piece)
-    flip_double_cut(piece, dc)
-    rotate_double_cut(piece, dc, up)
-    delete_feature(dc)
+    dc = get_double_cut()
+    if dc:
+        flip_double_cut()
+        rotate_double_cut(up)
+        delete_feature(dc)
       
             
-def get_double_cut(piece):
-    for feature in get_features_list(piece):
+def get_double_cut():
+    for feature in get_features_list():
         type = get_feature_property(feature, 'TYP')
         if type == "DoubleCut":
             return feature
     return None
 
-def flip_double_cut(piece, feature):
+def flip_double_cut():
+    piece = get_current_beam()
+    feature = get_double_cut()
     x_pos = (exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'Orientation'))
     if x_pos == "start":
         flip_beam()
 
-def rotate_double_cut(piece, feature, up = True):
+def rotate_double_cut(up = True):
+    piece = get_current_beam()
+    feature = get_double_cut() 
     face = (exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'FAC'))
     for i in range(4):
-        if (face == 'B' and not up) or (face == 'T' and up):
+        if (face == '3' and not up) or (face == '1' and up):
             break
-        rotate_beam()
+        rotate_beam(fix_start_modality=1)
+        beam = get_current_beam()
+        set_current_beam(beam, update_ui=True)
 
 def finished_leftovers(piece, leftover_features):
     for feature in leftover_features:
@@ -69,10 +72,6 @@ def remove_features_from_beam(piece, features):
     set_current_beam(current, update_ui=False)
 
 
-
-
-
-
 # def generate_predrill(piece):
 #     for feature in get_features_list(piece):
 #         type = get_feature_property(feature, 'TYP')
@@ -96,23 +95,17 @@ def feature_notes(piece, feature):
 
 
 
-# for piece in get_pieces_list(only_curr_group = False):
-#     set_current_beam(piece, update_ui=True)
-#     # debug(r"C:\ProgramData\Ddx\EasyWood\Machines\Epicon7235_ETH_Zürich\Scl\test.py", "Processing piece: " + piece)
-#     rotations = []
-#     for i in range(4):
-#         rotate_beam()
-#         set_current_piece(piece, rotation=PieceRotation(i))
-#         rotations.append( exec_num("McGetPieceOverturn", piece))
-
-
-
-
-
 
 parts_to_rotate = []
 for piece in get_pieces_list(only_curr_group = False):
-    set_current_beam(piece, update_ui=True)
+    # set_current_beam(piece, update_ui=True)
+
+    # for i in range(4):
+    #     rotate_beam()
+         
+
+
+
     # debug(r"C:\ProgramData\Ddx\EasyWood\Machines\Epicon7235_ETH_Zürich\Scl\test.py", "Processing piece: " + piece)
 
     start_face = parse_double_cut(piece)

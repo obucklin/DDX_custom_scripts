@@ -129,6 +129,7 @@
    num    C_nPriFor      = 0 ;         // [[DESC=%HelpDir%\%Lang%\Plav\Plav_nPriFor_%Lang%.htm]]
    num    C_nPriBla      = 0 ;         // [[DESC=%HelpDir%\%Lang%\Plav\Plav_nPriBla_%Lang%.htm]]
    num    C_nPriFre      = 0 ;         // [[DESC=%HelpDir%\%Lang%\Plav\Plav_nPriFre_%Lang%.htm]]
+   num    C_nPriEng      = 0 ;         // [[DESC=%HelpDir%\%Lang%\Plav\Plav_nPriEng_%Lang%.htm]]
    num    C_nDeltaSquad  = 0 ;         // [[VISIBILITY=USER+29|DESC=%HelpDir%\%Lang%\Plav\Plav_nDeltaSquad_%Lang%.htm]]
    num    C_nPriBlaDir   = 0 ;         // [[VISIBILITY=USER+26|DESC=%HelpDir%\%Lang%\Plav\Plav_nPriBlaDir_%Lang%.htm|OPT=0:MSG(2172);-10:MSG(2173);+10:MSG(2174)]]
 // [[END_SEC]]

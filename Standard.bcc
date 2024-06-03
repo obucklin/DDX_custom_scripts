@@ -10,64 +10,64 @@ function CustomerSpecialFunction( num nSection) : BOOL
    string sFace[10] ;
    vec3   v3AppoNormFace ;
 
-   if ( nSection == _ON_FEAT) then {
-      if ( $CL >= 421 AND $CL <= 427) then {
+   // if ( nSection == _ON_FEAT) then {
+   //    if ( $CL >= 421 AND $CL <= 427) then {
 
-         //DoDebug() ;
-         FindBlade( "F01", FALSE, TRUE, $EW, $ER, 0, _bForceComplete) ;
-         //I want to cross the normal vector of the first face with the normal vector of the secondary face
-         v3Appo = CROSS( $N1, $N2) ;
-         v3Appo = NORMALIZE( v3Appo) ;
+   //       //DoDebug() ;
+   //       FindBlade( "F01", FALSE, TRUE, $EW, $ER, 0, _bForceComplete) ;
+   //       //I want to cross the normal vector of the first face with the normal vector of the secondary face
+   //       v3Appo = CROSS( $N1, $N2) ;
+   //       v3Appo = NORMALIZE( v3Appo) ;
 
-         if ( ABS( v3Appo.z) > 0.707) then {
-            sKit = C_sPrefCont + C_vsNomeKitBlade[nBladeIndex] ;
+   //       if ( ABS( v3Appo.z) > 0.707) then {
+   //          sKit = C_sPrefCont + C_vsNomeKitBlade[nBladeIndex] ;
 
-         //setting of the kit that will work the face 2
-            //sets the attachment type of the kit
-            SetKitLeadInType( _LioNone) ;
-            SetKitLeadOutType( _LioNone) ;
-            //sets the kit perp
-            SetKitPerpendicular( TRUE) ;
-            CalculateToolDir( "F02", "F01") ;
-            //Sets the distance of the starting point of the kit from the beam
-            SetKitLeadInLenC( $E2V + 25) ;  //Vertical extension of face 2
-            //Sets the distance of the exit point of the kit from the beam
-            SetKitLeadOutLenC( $E2V + 25) ;
+   //       //setting of the kit that will work the face 2
+   //          //sets the attachment type of the kit
+   //          SetKitLeadInType( _LioNone) ;
+   //          SetKitLeadOutType( _LioNone) ;
+   //          //sets the kit perp
+   //          SetKitPerpendicular( TRUE) ;
+   //          CalculateToolDir( "F02", "F01") ;
+   //          //Sets the distance of the starting point of the kit from the beam
+   //          SetKitLeadInLenC( $E2V + 25) ;  //Vertical extension of face 2
+   //          //Sets the distance of the exit point of the kit from the beam
+   //          SetKitLeadOutLenC( $E2V + 25) ;
 
-            if( $N2.z < 0) then {
-               SetKitContInvertTrasmSide( 1) ;
-            }
+   //          if( $N2.z < 0) then {
+   //             SetKitContInvertTrasmSide( 1) ;
+   //          }
 
-            InsertKit( sKit, "F02", nPosXFeat, nPri) ;
+   //          InsertKit( sKit, "F02", nPosXFeat, nPri) ;
 
-         //setting of the kit that will work the face 1
-            CalculateToolDir( "F01", "F02") ;
-            SetKitPerpendicular( TRUE) ;
-            SetKitLeadInType( 0) ;
-            SetKitLeadOutType( 0) ;
-            SetKitLeadInLenC( $E1V + 25) ;
-            SetKitLeadOutLenC( $E1V + 25) ;
-            //sets the geometric inversion of the path
-            SetKitGeoInvert( TRUE) ;
+   //       //setting of the kit that will work the face 1
+   //          CalculateToolDir( "F01", "F02") ;
+   //          SetKitPerpendicular( TRUE) ;
+   //          SetKitLeadInType( 0) ;
+   //          SetKitLeadOutType( 0) ;
+   //          SetKitLeadInLenC( $E1V + 25) ;
+   //          SetKitLeadOutLenC( $E1V + 25) ;
+   //          //sets the geometric inversion of the path
+   //          SetKitGeoInvert( TRUE) ;
 
-            if ($N1.z < 0) then {
-               SetKitContInvertTrasmSide( 1) ;
-            }
+   //          if ($N1.z < 0) then {
+   //             SetKitContInvertTrasmSide( 1) ;
+   //          }
 
-            InsertKit( sKit, "F01", nPosXFeat, nPri) ;
+   //          InsertKit( sKit, "F01", nPosXFeat, nPri) ;
 
-            nVotoFeature = 5 ;
-         }
+   //          nVotoFeature = 5 ;
+   //       }
 
-         bExeStdFeatCond = FALSE ;
-      }
-   }
-   elsif ( nSection == _BEFORE_INSKIT) then {
-   }
-   elsif ( nSection == _AFTER_INSKIT) then {
-   }
-   elsif ( nSection == _ON_DISP) then {
-   }
+   //       bExeStdFeatCond = FALSE ;
+   //    }
+   //}
+   // elsif ( nSection == _BEFORE_INSKIT) then {
+   // }
+   // elsif ( nSection == _AFTER_INSKIT) then {
+   // }
+   // elsif ( nSection == _ON_DISP) then {
+   // }
    return bExeStdFeatCond ;
 }
 
