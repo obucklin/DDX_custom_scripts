@@ -1,12 +1,7 @@
 from ewd.beam import *
 from ewd.mach import get_pieces_list
 
-
-from sclcore import execute_command_bool as exec_bool
-from sclcore import execute_command_num as exec_num
 from sclcore import execute_command_string as exec_string
-from sclcore import Ref
-from bcfcore import do_debug
 
 
 def parse_double_cut(piece, up = True):
@@ -26,12 +21,9 @@ def rotate_double_cut(piece, feature, up = True):
     if not up:
         rotations += 2
     if rotations:
-        rotate_beam(piece, num_step = rotations)
-
+        rotate_beam(piece, num_step = rotations, fix_start_modality = 1)
 
 '''script begins here'''
-do_debug()
-
 
 for piece in get_pieces_list(only_curr_group = False):
     set_current_beam(piece, update_ui = True)
