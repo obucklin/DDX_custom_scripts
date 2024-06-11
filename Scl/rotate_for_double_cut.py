@@ -3,7 +3,6 @@ from ewd.mach import get_pieces_list
 
 from sclcore import execute_command_string as exec_string
 
-
 def parse_double_cut(piece, up = True):
     dc = get_double_cut(piece)
     if dc:
@@ -28,3 +27,4 @@ def rotate_double_cut(piece, feature, up = True):
 for piece in get_pieces_list(only_curr_group = False):
     set_current_beam(piece, update_ui = True)
     parse_double_cut(piece, up = True)
+

@@ -3,7 +3,7 @@ from ewd import beam
 from ewd.beam import *
 from ewd.mach import get_pieces_list
 from ddx.logger import debug
-from ddx.gdb import get_note
+from ddx.gdb import get_note, delete_part, delete, delete_entity
 from sclcore import execute_command_bool as exec_bool
 from sclcore import execute_command_num as exec_num
 from sclcore import execute_command_string as exec_string
@@ -11,21 +11,40 @@ from sclcore import Ref
 import bcfcore
 from ewd import error
 
-bcfcore.do_debug()
 
+def remove_double_cuts():
+    for piece in get_pieces_list(only_curr_group = False):
+        set_current_beam(piece, update_ui=True)
+        for feature in get_features_list():
+            if get_feature_property(feature, 'TYP') == "DoubleCut":
+                exec_bool("SetNotes", piece + "\\" + feature, "NOTW", "1")
 
 def feature_executed(piece, feature):
-    notw = exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'NOTW')
-    return notw == '0'
+    if exec_str("GetNotes", piece + "\\" + feature, "TYP") == "DoubleCut":
+        return True
+    result = exec_string("GetNotes", '{}\\{}'.format(piece, feature), 'NOTW') == '0'
+    return result
 
-def remove_features_from_beam(piece, features):
-    if isinstance(features, str):
-        features = [features]
-    current = get_current_beam()
-    set_current_beam(piece, update_ui=False)
+def reset_features(piece, features):
     for feature in features:
-        delete_feature(feature)
-    set_current_beam(current, update_ui=False)
+        exec_bool("SetNotes", piece + "\\" + feature, "NOTW", "0")
+    
+
+def invert_active_features(piece):
+    active_features = []
+    for feature in get_features_list(piece):
+        if exec_str("GetNotes", piece + "\\" + feature, "TYP") == "DoubleCut":
+            continue
+        if exec_string("GetNotes", piece + "\\" + feature, "NOTW") == '1':
+            exec_bool("SetNotes", piece + "\\" + feature, "NOTW", "0")
+            active_features.append(feature)
+        else:
+            exec_bool("SetNotes", piece + "\\" + feature, "NOTW", "1")
+    return active_features
+
+
+bcfcore.do_debug()
+remove_double_cuts()
 
 
 parts_to_rotate = []
@@ -33,38 +52,45 @@ for piece in get_pieces_list(only_curr_group = False):
     set_current_beam(piece, update_ui=True)
 
     exec_bool("BeamMach", True, False)
-
-    remove_from_copy = []   
-    remove_from_piece = []
+    copy = copy_beam(piece)
+    rename_beam(piece + "_", copy)
+    copy = piece + "_"
     for feature in get_features_list():
-        if feature_executed(piece, feature):
-            remove_from_copy.append(feature)
-        else:
-            remove_from_piece.append(feature)
-    if len(remove_from_piece)>0:
-        copy = copy_beam(piece)
-        rename_beam(piece + "_", copy)
-        copy = piece + "_"
-        parts_to_rotate.append(str(piece + "_"))
-        remove_features_from_beam(piece, remove_from_piece)
-        remove_features_from_beam(copy, remove_from_copy)
+        if not feature_executed(piece, feature):
+            if copy not in parts_to_rotate:
+                parts_to_rotate.append(copy)
+                piece.rename(piece + "_pt1_")
+    if copy not in parts_to_rotate:
+        delete_part(copy)    
+    
 
-
-for piece in parts_to_rotate:
-    set_current_beam(piece, update_ui=True)
+for copy in parts_to_rotate:
+    set_current_beam(copy, update_ui=True)
+    features_to_try = invert_active_features(copy)
+    base_name = copy
     i = 0    
-    for rotations in [2,1,2]:
-        i += rotations
-        rotate_beam(num_step = rotations)
-        for feature in get_features_list():
-            on = exec_bool("SetNotes", piece + "\\" + feature, "NOTW", "0")
-        exec_bool("BeamMach", True, False)
-        for feature in get_features_list():
-            if not feature_executed(piece, feature):
+    success = False
+    for j in range(2):
+        rots = [[2,1,2], [0,2,1,2]]
+        for rotations in rots[j]:
+            i += rotations
+            rename_beam(base_name + "rot:_" + str(i % 4), copy)    
+            copy = base_name + "rot:_" + str(i % 4) 
+            set_current_beam(copy, update_ui=True)
+            rotate_beam(num_step = i)
+            success = exec_bool("BeamMach", True, False)
+            # for feature in features_to_try:
+            # if not feature_executed(copy, feature):
+            if not success:
+                reset_features(copy, features_to_try)
                 break
+            else:
+                break      
+        if success:
+            break
         else:
-            rename_beam(piece + "rot:_" + str(i % 4))
-            debug(r"C:\ProgramData\Ddx\EasyWood\Machines\Epicon7235_ETH_Zürich\Scl\test.py", "SUCCESS on piece: " + piece)
-            break      
+            rotate_beam(num_step = 3)
+            flip_beam()        
+            base_name +="flip_"
 
-
+    # import reorder_machinings

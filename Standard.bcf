@@ -2157,7 +2157,7 @@ AUTOMACH      //----------------------------------------------------------------
                                  if ( nAppo <= $EW  AND  nAppo != 0) then {
                                     SETKITDEPTH( 3 - $ER) ;
                                     CalculateHeadSolution( $N1) ;
-                                    InsertKit( C_sNameFreInci, "F01", nPosXFeat, C_nPriEng) ;
+                                    InsertKit( C_sNameFreInci, "F01", nPosXFeat, 100) ;
                                  }
                                  else
                                     OutputReport( _BcfWarnErr, "{sError} {sLap}: {$NaF} {sNotExecute} {sNotWork}") ;
@@ -3360,7 +3360,7 @@ AUTOMACH      //----------------------------------------------------------------
                else
                   nVotoFeature = 1 ;
                if ( C_sNameFreInci != "") then
-                  InsertKit( C_sNameFreInci, OPT( $CaF == 3060, "C01,C02,C03,C04,C05", "C0"), nPosXFeat, C_nPriEng) ;
+                  InsertKit( C_sNameFreInci, OPT( $CaF == 3060, "C01,C02,C03,C04,C05", "C0"), nPosXFeat, 10) ;
             }
             else
                OutputReport( _BcfWarn, "{sAttention} : {$Naf} {sNotExecute}") ;

@@ -1,6 +1,3 @@
-from ast import Break
-import re
-from requests import delete, get
 import ewd
 from ewd import beam
 from ewd.beam import *
@@ -26,7 +23,7 @@ machining_order = [
 
 # for piece in get_pieces_list(only_curr_group = False):
 #     set_current_beam(piece, update_ui=True)
-exec_bool("BeamMach", True, False)
+#exec_bool("BeamMach", True, False)
 machinings = get_machining_list()
 
 machining_dict = {}
